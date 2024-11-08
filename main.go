@@ -13,9 +13,15 @@ func main() {
 		panic(err)
 	}
 
+	var msgs []imap.Message
 	for _, i := range c.Inboxes {
-		if err = imap.CheckInbox(i); err != nil {
+		if msgs, err = imap.LoadMessages(i); err != nil {
 			log.Println(err)
+			continue
+		}
+		log.Printf("loaded %d messages", len(msgs))
+		for _, m := range msgs {
+			log.Println("-", m.Subject)
 		}
 	}
 }
