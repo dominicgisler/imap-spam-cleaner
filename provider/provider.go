@@ -1,6 +1,22 @@
 package provider
 
+import (
+	"errors"
+	"github.com/dominicgisler/imap-spam-cleaner/imap"
+)
+
 type Provider interface {
-	Init() (*Provider, error)
-	Analyze(string) (int, error)
+	Name() string
+	Init(credentials map[string]string) error
+	Analyze(message imap.Message) (int, error)
+}
+
+func New(t string) (Provider, error) {
+	providers := []Provider{&OpenAI{}}
+	for _, provider := range providers {
+		if provider.Name() == t {
+			return provider, nil
+		}
+	}
+	return nil, errors.New("unknown provider")
 }
