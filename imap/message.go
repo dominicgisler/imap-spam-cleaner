@@ -1,6 +1,9 @@
 package imap
 
+import "github.com/emersion/go-imap/v2"
+
 type Message struct {
+	UID         imap.UID
 	DeliveredTo string
 	From        string
 	To          string

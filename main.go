@@ -1,11 +1,21 @@
 package main
 
 import (
+	"flag"
 	"github.com/dominicgisler/imap-spam-cleaner/config"
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
+	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/dominicgisler/imap-spam-cleaner/provider"
-	"log"
 )
+
+func init() {
+	var v bool
+	flag.BoolVar(&v, "verbose", false, "Enable debug logging")
+	flag.Parse()
+	if v {
+		logx.Init(true)
+	}
+}
 
 func main() {
 
@@ -16,32 +26,60 @@ func main() {
 
 	var msgs []imap.Message
 	var p provider.Provider
+	var im *imap.Imap
+
 	for i, inbox := range c.Inboxes {
+		logx.Infof("handling %s", inbox.Username)
+
 		prov, ok := c.Providers[inbox.Provider]
 		if !ok {
-			log.Printf("invalid provider %s for inbox %d", inbox.Provider, i)
+			logx.Warnf("invalid provider %s for inbox %d", inbox.Provider, i)
 			continue
 		}
-		if msgs, err = imap.LoadMessages(inbox); err != nil {
-			log.Printf("could not load messages: %v\n", err)
+
+		if im, err = imap.New(inbox); err != nil {
+			logx.Errorf("could not load imap: %v\n", err)
 			continue
 		}
-		log.Printf("loaded %d messages", len(msgs))
+
+		if msgs, err = im.LoadMessages(); err != nil {
+			logx.Errorf("could not load messages: %v\n", err)
+			im.Close()
+			continue
+		}
+		logx.Infof("loaded %d messages", len(msgs))
+
 		p, err = provider.New(prov.Type)
 		if err != nil {
-			log.Printf("could not load provider: %v\n", err)
+			logx.Errorf("could not load provider: %v\n", err)
+			im.Close()
 			continue
 		}
+
 		if err = p.Init(prov.Credentials); err != nil {
-			log.Printf("could not init provider: %v\n", err)
+			logx.Errorf("could not init provider: %v\n", err)
+			im.Close()
 			continue
 		}
+
+		moved := 0
 		for _, m := range msgs {
 			n, err := p.Analyze(m)
 			if err != nil {
-				log.Printf("could not analyze message: %v\n", err)
+				logx.Errorf("could not analyze message (%s): %v\n", m.Subject, err)
+				continue
 			}
-			log.Printf("Spam score of \"%s\": %d\n", m.Subject, n)
+			logx.Debugf("spam score of message #%d (%s): %d/100", m.UID, m.Subject, n)
+			if n >= inbox.MinScore {
+				if err = im.MoveMessage(m.UID, inbox.Spam); err != nil {
+					logx.Errorf("could not move message (%s): %v\n", m.Subject, err)
+					continue
+				}
+				moved++
+			}
 		}
+		logx.Infof("moved %d messages", moved)
+
+		im.Close()
 	}
 }

@@ -25,6 +25,7 @@ type Inbox struct {
 	Provider string `yaml:"provider" validate:"required"`
 	Inbox    string `yaml:"inbox"    validate:"required"`
 	Spam     string `yaml:"spam"     validate:"required"`
+	MinScore int    `yaml:"minscore" validate:"required"`
 }
 
 func Load(path string) (*Config, error) {

@@ -11,31 +11,54 @@ import (
 	"io"
 )
 
-func LoadMessages(i config.Inbox) ([]Message, error) {
+type Imap struct {
+	client *imapclient.Client
+	cfg    config.Inbox
+}
+
+func New(cfg config.Inbox) (*Imap, error) {
 
 	var err error
-	var client *imapclient.Client
+	i := &Imap{
+		cfg: cfg,
+	}
+
+	if cfg.TLS {
+		i.client, err = imapclient.DialTLS(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), nil)
+	} else {
+		i.client, err = imapclient.DialInsecure(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), nil)
+	}
+
+	if err != nil {
+		i.Close()
+		return nil, fmt.Errorf("failed to dial IMAP server: %v", err)
+	}
+
+	if err = i.client.Login(cfg.Username, cfg.Password).Wait(); err != nil {
+		i.Close()
+		return nil, fmt.Errorf("failed to login: %v", err)
+	}
+
+	return i, nil
+}
+
+func (i *Imap) Close() {
+	if i.client != nil {
+		i.client.Logout()
+		_ = i.client.Close()
+	}
+}
+
+func (i *Imap) LoadMessages() ([]Message, error) {
+
+	var err error
 	var mbox *imap.SelectData
 	var msgs []*imapclient.FetchMessageBuffer
 	var mr *mail.Reader
 	var p *mail.Part
 	var messages []Message
 
-	if i.TLS {
-		client, err = imapclient.DialTLS(fmt.Sprintf("%s:%d", i.Host, i.Port), nil)
-	} else {
-		client, err = imapclient.DialInsecure(fmt.Sprintf("%s:%d", i.Host, i.Port), nil)
-	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to dial IMAP server: %v", err)
-	}
-	defer func() { _ = client.Close() }()
-
-	if err = client.Login(i.Username, i.Password).Wait(); err != nil {
-		return nil, fmt.Errorf("failed to login: %v", err)
-	}
-
-	mbox, err = client.Select(i.Inbox, nil).Wait()
+	mbox, err = i.client.Select(i.cfg.Inbox, nil).Wait()
 	if err != nil {
 		return nil, fmt.Errorf("failed to select INBOX: %v", err)
 	}
@@ -45,9 +68,10 @@ func LoadMessages(i config.Inbox) ([]Message, error) {
 		seqSet.AddRange(1, mbox.NumMessages)
 		fetchOptions := &imap.FetchOptions{
 			Envelope:    true,
+			UID:         true,
 			BodySection: []*imap.FetchItemBodySection{{Peek: true}},
 		}
-		msgs, err = client.Fetch(seqSet, fetchOptions).Collect()
+		msgs, err = i.client.Fetch(seqSet, fetchOptions).Collect()
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch messages: %v", err)
 		}
@@ -65,6 +89,7 @@ func LoadMessages(i config.Inbox) ([]Message, error) {
 			}
 
 			message := Message{
+				UID:         msg.UID,
 				DeliveredTo: mr.Header.Get("Delivered-To"),
 				From:        mr.Header.Get("From"),
 				To:          mr.Header.Get("To"),
@@ -95,9 +120,14 @@ func LoadMessages(i config.Inbox) ([]Message, error) {
 		}
 	}
 
-	if err = client.Logout().Wait(); err != nil {
-		return nil, fmt.Errorf("failed to logout: %v", err)
-	}
-
 	return messages, nil
+}
+
+func (i *Imap) MoveMessage(uid imap.UID, mailbox string) error {
+	uidSet := imap.UIDSet{}
+	uidSet.AddNum(uid)
+	if _, err := i.client.Move(uidSet, mailbox).Wait(); err != nil {
+		return err
+	}
+	return nil
 }

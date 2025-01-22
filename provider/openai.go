@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
+	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/sashabaranov/go-openai"
 	"strconv"
-	"strings"
 )
 
 type OpenAI struct {
@@ -23,6 +23,17 @@ func (p *OpenAI) Init(credentials map[string]string) error {
 }
 
 func (p *OpenAI) Analyze(msg imap.Message) (int, error) {
+
+	cont := ""
+	contLen := 0
+	for _, cnt := range msg.Contents {
+		contLen += len(cnt)
+		if contLen > 100000 {
+			logx.Debugf("skipping bytes for message #%d (%s) because of openapi rate limit", msg.UID, msg.Subject)
+			break
+		}
+		cont += cnt + "\n"
+	}
 
 	resp, err := p.client.CreateChatCompletion(
 		context.Background(),
@@ -42,7 +53,7 @@ func (p *OpenAI) Analyze(msg imap.Message) (int, error) {
 						msg.Cc,
 						msg.Bcc,
 						msg.Subject,
-						strings.Join(msg.Contents, "\n"),
+						cont,
 					),
 				},
 			},
