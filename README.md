@@ -43,4 +43,5 @@ inboxes:                      # inboxes to be checked
     provider: prov1           # provider used for spam analysis
     inbox: INBOX              # inbox folder
     spam: INBOX.Spam          # spam folder
+    minscore: 75              # min score to detect spam (0-100)
 ```
