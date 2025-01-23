@@ -5,7 +5,8 @@ providers:                    # providers to be used for inboxes
       apikey: some-api-key
 
 inboxes:                      # inboxes to be checked
-  - host: mail.domain.tld     # imap host
+  - schedule: "* * * * *"     # schedule in cron format (when to execute spam analysis)
+    host: mail.domain.tld     # imap host
     port: 143                 # imap port
     tls: false                # imap tls
     username: user@domain.tld # imap user

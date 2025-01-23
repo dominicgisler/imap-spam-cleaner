@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+const configPath = "config.yml"
+
 type Config struct {
 	Providers map[string]Provider `yaml:"providers" validate:"required,dive"`
 	Inboxes   []Inbox             `yaml:"inboxes"   validate:"required,dive"`
@@ -13,10 +15,11 @@ type Config struct {
 
 type Provider struct {
 	Type        string            `yaml:"type"        validate:"required,oneof=openai"`
-	Credentials map[string]string `json:"credentials" validate:"required"`
+	Credentials map[string]string `yaml:"credentials" validate:"required"`
 }
 
 type Inbox struct {
+	Schedule string `yaml:"schedule" validate:"required"`
 	Host     string `yaml:"host"     validate:"required"`
 	Port     int    `yaml:"port"     validate:"required"`
 	TLS      bool   `yaml:"tls"      validate:"omitempty"`
@@ -28,9 +31,9 @@ type Inbox struct {
 	MinScore int    `yaml:"minscore" validate:"required"`
 }
 
-func Load(path string) (*Config, error) {
+func Load() (*Config, error) {
 
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, err
 	}

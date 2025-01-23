@@ -52,3 +52,11 @@ func Error(v ...interface{}) {
 func Errorf(format string, v ...interface{}) {
 	logger.Errorf(format, v...)
 }
+
+func Panic(v ...interface{}) {
+	logger.Panic(v...)
+}
+
+func Panicf(format string, v ...interface{}) {
+	logger.Panicf(format, v...)
+}

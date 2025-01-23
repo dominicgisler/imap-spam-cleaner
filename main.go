@@ -18,11 +18,10 @@ func init() {
 }
 
 func main() {
-
-	c, err := config.Load("config.yml")
+	c, err := config.Load()
 	if err != nil {
-		panic(err)
+		logx.Errorf("Could not load config: %v", err)
+		return
 	}
-
-	inbox.Process(c)
+	inbox.Schedule(c)
 }

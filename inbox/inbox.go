@@ -5,9 +5,48 @@ import (
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/dominicgisler/imap-spam-cleaner/provider"
+	"github.com/go-co-op/gocron/v2"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
-func Process(cfg *config.Config) {
+func Schedule(cfg *config.Config) {
+
+	s, err := gocron.NewScheduler()
+	if err != nil {
+		logx.Errorf("Could not create scheduler: %v", err)
+		return
+	}
+
+	for i, inbox := range cfg.Inboxes {
+		logx.Infof("Scheduling inbox %s (%s)", inbox.Username, inbox.Schedule)
+		prov, ok := cfg.Providers[inbox.Provider]
+		if !ok {
+			logx.Errorf("Invalid provider %s for inbox %d", inbox.Provider, i)
+			continue
+		}
+		if _, err = s.NewJob(
+			gocron.CronJob(inbox.Schedule, false),
+			gocron.NewTask(processInbox, inbox, prov),
+		); err != nil {
+			logx.Errorf("Could not schedule inbox %s (%s): %v", inbox.Username, inbox.Schedule, err)
+		}
+	}
+
+	s.Start()
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+	sig := <-ch
+	logx.Debugf("Received %s, shutting down", sig.String())
+
+	if err = s.Shutdown(); err != nil {
+		logx.Errorf("Could not shutdown scheduler: %v ", err)
+	}
+}
+
+func processInbox(inbox config.Inbox, prov config.Provider) {
 
 	var err error
 	var msgs []imap.Message
@@ -15,58 +54,50 @@ func Process(cfg *config.Config) {
 	var im *imap.Imap
 	var n int
 
-	for i, inbox := range cfg.Inboxes {
-		logx.Infof("handling %s", inbox.Username)
+	logx.Infof("Handling %s", inbox.Username)
 
-		prov, ok := cfg.Providers[inbox.Provider]
-		if !ok {
-			logx.Warnf("invalid provider %s for inbox %d", inbox.Provider, i)
+	if im, err = imap.New(inbox); err != nil {
+		logx.Errorf("Could not load imap: %v\n", err)
+		return
+	}
+
+	if msgs, err = im.LoadMessages(); err != nil {
+		logx.Errorf("Could not load messages: %v\n", err)
+		im.Close()
+		return
+	}
+	logx.Infof("Loaded %d messages", len(msgs))
+
+	p, err = provider.New(prov.Type)
+	if err != nil {
+		logx.Errorf("Could not load provider: %v\n", err)
+		im.Close()
+		return
+	}
+
+	if err = p.Init(prov.Credentials); err != nil {
+		logx.Errorf("Could not init provider: %v\n", err)
+		im.Close()
+		return
+	}
+
+	moved := 0
+	for _, m := range msgs {
+		if n, err = p.Analyze(m); err != nil {
+			logx.Errorf("Could not analyze message (%s): %v\n", m.Subject, err)
 			continue
 		}
+		logx.Debugf("Spam score of message #%d (%s): %d/100", m.UID, m.Subject, n)
 
-		if im, err = imap.New(inbox); err != nil {
-			logx.Errorf("could not load imap: %v\n", err)
-			continue
-		}
-
-		if msgs, err = im.LoadMessages(); err != nil {
-			logx.Errorf("could not load messages: %v\n", err)
-			im.Close()
-			continue
-		}
-		logx.Infof("loaded %d messages", len(msgs))
-
-		p, err = provider.New(prov.Type)
-		if err != nil {
-			logx.Errorf("could not load provider: %v\n", err)
-			im.Close()
-			continue
-		}
-
-		if err = p.Init(prov.Credentials); err != nil {
-			logx.Errorf("could not init provider: %v\n", err)
-			im.Close()
-			continue
-		}
-
-		moved := 0
-		for _, m := range msgs {
-			if n, err = p.Analyze(m); err != nil {
-				logx.Errorf("could not analyze message (%s): %v\n", m.Subject, err)
+		if n >= inbox.MinScore {
+			if err = im.MoveMessage(m.UID, inbox.Spam); err != nil {
+				logx.Errorf("Could not move message (%s): %v\n", m.Subject, err)
 				continue
 			}
-			logx.Debugf("spam score of message #%d (%s): %d/100", m.UID, m.Subject, n)
-
-			if n >= inbox.MinScore {
-				if err = im.MoveMessage(m.UID, inbox.Spam); err != nil {
-					logx.Errorf("could not move message (%s): %v\n", m.Subject, err)
-					continue
-				}
-				moved++
-			}
+			moved++
 		}
-		logx.Infof("moved %d messages", moved)
-
-		im.Close()
 	}
+	logx.Infof("Moved %d messages", moved)
+
+	im.Close()
 }

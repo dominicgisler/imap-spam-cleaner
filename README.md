@@ -21,7 +21,7 @@ Depending on a spam score, the message can be moved to the spam folder, keeping 
 - Clone this repository
 - Load dependencies (`go get ./...`)
 - Create `config.yml` matching your inboxes
-- Run the application (`go run .`)
+- Run the application (`go run .` or `go run . -verbose` to see debug output)
 
 ### Configuration
 
@@ -35,7 +35,8 @@ providers:                    # providers to be used for inboxes
       apikey: some-api-key
 
 inboxes:                      # inboxes to be checked
-  - host: mail.domain.tld     # imap host
+  - schedule: "* * * * *"     # schedule in cron format (when to execute spam analysis)
+    host: mail.domain.tld     # imap host
     port: 143                 # imap port
     tls: false                # imap tls
     username: user@domain.tld # imap user
