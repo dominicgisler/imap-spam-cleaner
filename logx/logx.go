@@ -1,65 +1,54 @@
 package logx
 
 import (
-	"fmt"
-	"log"
+	"github.com/sirupsen/logrus"
+	"os"
 )
 
-const (
-	TypeInfo  = "INFO"
-	TypeDebug = "DEBUG"
-	TypeWarn  = "WARN"
-	TypeError = "ERROR"
-)
+var logger *logrus.Logger
 
-var verbose bool
+func init() {
+	logger = logrus.New()
+	logger.SetOutput(os.Stdout)
+	logger.SetLevel(logrus.InfoLevel)
+	logger.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp: true,
+		PadLevelText:  true,
+	})
+}
 
-func Init(verboseMode bool) {
-	verbose = verboseMode
+func SetLevel(level logrus.Level) {
+	logger.SetLevel(level)
 }
 
 func Info(v ...interface{}) {
-	Log(TypeInfo, v...)
+	logger.Info(v...)
 }
 
 func Infof(format string, v ...interface{}) {
-	Logf(TypeInfo, format, v...)
+	logger.Infof(format, v...)
 }
 
 func Debug(v ...interface{}) {
-	Log(TypeDebug, v...)
+	logger.Debug(v...)
 }
 
 func Debugf(format string, v ...interface{}) {
-	Logf(TypeDebug, format, v...)
+	logger.Debugf(format, v...)
 }
 
 func Warn(v ...interface{}) {
-	Log(TypeWarn, v...)
+	logger.Warn(v...)
 }
 
 func Warnf(format string, v ...interface{}) {
-	Logf(TypeWarn, format, v...)
+	logger.Warnf(format, v...)
 }
 
 func Error(v ...interface{}) {
-	Log(TypeError, v...)
+	logger.Error(v...)
 }
 
 func Errorf(format string, v ...interface{}) {
-	Logf(TypeError, format, v...)
-}
-
-func Log(tp string, v ...interface{}) {
-	if tp == TypeDebug && !verbose {
-		return
-	}
-	log.Printf("[%s] %s\n", tp, fmt.Sprint(v...))
-}
-
-func Logf(tp, format string, v ...interface{}) {
-	if tp == TypeDebug && !verbose {
-		return
-	}
-	log.Printf("[%s] "+format+"\n", append([]interface{}{tp}, v...)...)
+	logger.Errorf(format, v...)
 }

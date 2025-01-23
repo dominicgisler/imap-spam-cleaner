@@ -7,6 +7,7 @@ require (
 	github.com/emersion/go-message v0.18.2
 	github.com/go-playground/validator/v10 v10.24.0
 	github.com/sashabaranov/go-openai v1.36.1
+	github.com/sirupsen/logrus v1.9.3
 	gopkg.in/yaml.v3 v3.0.1
 )
 

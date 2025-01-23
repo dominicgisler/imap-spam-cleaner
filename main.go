@@ -5,6 +5,7 @@ import (
 	"github.com/dominicgisler/imap-spam-cleaner/config"
 	"github.com/dominicgisler/imap-spam-cleaner/inbox"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
+	"github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -12,7 +13,7 @@ func init() {
 	flag.BoolVar(&v, "verbose", false, "Enable debug logging")
 	flag.Parse()
 	if v {
-		logx.Init(true)
+		logx.SetLevel(logrus.DebugLevel)
 	}
 }
 
