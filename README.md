@@ -37,7 +37,7 @@ providers:                    # providers to be used for inboxes
 inboxes:                      # inboxes to be checked
   - host: mail.domain.tld     # imap host
     port: 143                 # imap port
-    tls: false                # imap ssl
+    tls: false                # imap tls
     username: user@domain.tld # imap user
     password: mypass          # imap password
     provider: prov1           # provider used for spam analysis
