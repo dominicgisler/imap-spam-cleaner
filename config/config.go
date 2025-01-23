@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -9,8 +10,13 @@ import (
 const configPath = "config.yml"
 
 type Config struct {
+	Logging   Logging             `yaml:"logging" validate:"required"`
 	Providers map[string]Provider `yaml:"providers" validate:"required,dive"`
 	Inboxes   []Inbox             `yaml:"inboxes"   validate:"required,dive"`
+}
+
+type Logging struct {
+	Level string `yaml:"level" validate:"omitempty"`
 }
 
 type Provider struct {
@@ -46,6 +52,12 @@ func Load() (*Config, error) {
 	if err = validator.New().Struct(&config); err != nil {
 		return nil, err
 	}
+
+	if config.Logging.Level != "" {
+		logx.SetLevel(config.Logging.Level)
+	}
+
+	logx.Debug("Loaded config")
 
 	return &config, nil
 }

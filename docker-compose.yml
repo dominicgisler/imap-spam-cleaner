@@ -1,0 +1,8 @@
+services:
+  imap-spam-cleaner:
+    image: dominicgisler/imap-spam-cleaner:latest
+    container_name: imap-spam-cleaner
+    hostname: imap-spam-cleaner
+    restart: always
+    volumes:
+      - ./config.yml:/app/config.yml:ro

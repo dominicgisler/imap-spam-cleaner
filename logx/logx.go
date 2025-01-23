@@ -17,8 +17,13 @@ func init() {
 	})
 }
 
-func SetLevel(level logrus.Level) {
-	logger.SetLevel(level)
+func SetLevel(level string) {
+	lvl, err := logrus.ParseLevel(level)
+	if err != nil {
+		logger.Errorf("Invalid log level: %s", level)
+		return
+	}
+	logger.SetLevel(lvl)
 }
 
 func Info(v ...interface{}) {

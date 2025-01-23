@@ -1,3 +1,6 @@
+logging:
+  level: debug                # logging level (panic, fatal, error, warn, info, debug, trace)
+
 providers:                    # providers to be used for inboxes
   prov1:                      # provider name
     type: openai              # provider type
