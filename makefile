@@ -1,8 +1,8 @@
 .PHONY: default lint publish --tag
 .DEFAULT_GOAL := default
 
-default:
-	@docker build -f Dockerfile -t dominicgisler/imap-spam-cleaner .
+default: --tag
+	@docker build -f Dockerfile -t dominicgisler/imap-spam-cleaner:$(TAG) .
 
 lint:
 	@golangci-lint run
