@@ -12,6 +12,7 @@ func init() {
 	logger.SetOutput(os.Stdout)
 	logger.SetLevel(logrus.InfoLevel)
 	logger.SetFormatter(&logrus.TextFormatter{
+		ForceColors:   true,
 		FullTimestamp: true,
 		PadLevelText:  true,
 	})

@@ -1,0 +1,7 @@
+.idea/
+config.example.yml
+config.yml
+docker-compose.yml
+Dockerfile
+makefile
+README.md

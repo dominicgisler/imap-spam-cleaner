@@ -1,4 +1,4 @@
-.PHONY: default lint
+.PHONY: default lint publish --tag
 .DEFAULT_GOAL := default
 
 default:
@@ -6,3 +6,9 @@ default:
 
 lint:
 	@golangci-lint run
+
+publish: --tag
+	@docker push dominicgisler/imap-spam-cleaner:$(TAG)
+
+--tag:
+	@if [ "$(TAG)" = "" ]; then echo "TAG not set" && exit 1; else exit 0; fi
