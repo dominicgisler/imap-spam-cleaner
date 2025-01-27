@@ -75,7 +75,7 @@ func processInbox(inbox config.Inbox, prov config.Provider) {
 		return
 	}
 
-	if err = p.Init(prov.Credentials); err != nil {
+	if err = p.Init(prov.Config); err != nil {
 		logx.Errorf("Could not init provider: %v\n", err)
 		im.Close()
 		return

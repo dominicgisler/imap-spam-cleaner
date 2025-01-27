@@ -7,7 +7,8 @@ import (
 
 type Provider interface {
 	Name() string
-	Init(credentials map[string]string) error
+	Init(config map[string]string) error
+	ValidateConfig(config map[string]string) error
 	Analyze(message imap.Message) (int, error)
 }
 

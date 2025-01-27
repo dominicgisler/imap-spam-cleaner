@@ -20,8 +20,8 @@ type Logging struct {
 }
 
 type Provider struct {
-	Type        string            `yaml:"type"        validate:"required,oneof=openai"`
-	Credentials map[string]string `yaml:"credentials" validate:"required"`
+	Type   string            `yaml:"type"   validate:"required,oneof=openai"`
+	Config map[string]string `yaml:"config" validate:"required"`
 }
 
 type Inbox struct {

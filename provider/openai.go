@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
@@ -10,15 +11,42 @@ import (
 )
 
 type OpenAI struct {
-	client *openai.Client
+	client  *openai.Client
+	apikey  string
+	model   string
+	maxsize int
 }
 
 func (p *OpenAI) Name() string {
 	return "openai"
 }
 
-func (p *OpenAI) Init(credentials map[string]string) error {
-	p.client = openai.NewClient(credentials["apikey"])
+func (p *OpenAI) ValidateConfig(config map[string]string) error {
+
+	if config["apikey"] == "" {
+		return errors.New("openai apikey is required")
+	}
+	p.apikey = config["apikey"]
+
+	if config["model"] == "" {
+		return errors.New("openai model is required")
+	}
+	p.model = config["model"]
+
+	n, err := strconv.ParseInt(config["maxsize"], 10, 64)
+	if err != nil || n < 1 {
+		return errors.New("openai maxsize must be a positive integer")
+	}
+	p.maxsize = int(n)
+
+	return nil
+}
+
+func (p *OpenAI) Init(config map[string]string) error {
+	if err := p.ValidateConfig(config); err != nil {
+		return err
+	}
+	p.client = openai.NewClient(p.apikey)
 	return nil
 }
 
@@ -28,8 +56,8 @@ func (p *OpenAI) Analyze(msg imap.Message) (int, error) {
 	contLen := 0
 	for _, cnt := range msg.Contents {
 		contLen += len(cnt)
-		if contLen > 100000 {
-			logx.Debugf("skipping bytes for message #%d (%s) because of openapi rate limit", msg.UID, msg.Subject)
+		if contLen > p.maxsize {
+			logx.Debugf("skipping bytes for message #%d (%s)", msg.UID, msg.Subject)
 			break
 		}
 		cont += cnt + "\n"
@@ -38,7 +66,7 @@ func (p *OpenAI) Analyze(msg imap.Message) (int, error) {
 	resp, err := p.client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: openai.GPT4o,
+			Model: p.model,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role: openai.ChatMessageRoleSystem,
