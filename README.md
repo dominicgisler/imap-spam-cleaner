@@ -40,8 +40,10 @@ logging:
 providers:                    # providers to be used for inboxes
   prov1:                      # provider name
     type: openai              # provider type
-    credentials:              # provider specific credentials
-      apikey: some-api-key
+    config:                   # provider specific configuration
+      apikey: some-api-key    # apikey
+      model: gpt-4o-mini      # gpt model to use
+      maxsize: 100000         # message size limit for prompt (bytes)
 
 inboxes:                      # inboxes to be checked
   - schedule: "* * * * *"     # schedule in cron format (when to execute spam analysis)
