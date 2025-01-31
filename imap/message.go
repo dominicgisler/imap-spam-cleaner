@@ -1,6 +1,9 @@
 package imap
 
-import "github.com/emersion/go-imap/v2"
+import (
+	"github.com/emersion/go-imap/v2"
+	"time"
+)
 
 type Message struct {
 	UID         imap.UID
@@ -11,4 +14,5 @@ type Message struct {
 	Bcc         string
 	Subject     string
 	Contents    []string
+	Date        time.Time
 }

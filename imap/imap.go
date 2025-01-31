@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/dominicgisler/imap-spam-cleaner/config"
+	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
 	_ "github.com/emersion/go-message/charset"
 	"github.com/emersion/go-message/mail"
 	"io"
+	"time"
 )
 
 type Imap struct {
@@ -58,6 +60,18 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 	var p *mail.Part
 	var messages []Message
 
+	var minAge, maxAge time.Duration
+	if i.cfg.MinAge != "" {
+		if minAge, err = time.ParseDuration(i.cfg.MinAge); err != nil {
+			logx.Warnf("failed to parse min age: %v", err)
+		}
+	}
+	if i.cfg.MaxAge != "" {
+		if maxAge, err = time.ParseDuration(i.cfg.MaxAge); err != nil {
+			logx.Warnf("failed to parse max age: %v", err)
+		}
+	}
+
 	mbox, err = i.client.Select(i.cfg.Inbox, nil).Wait()
 	if err != nil {
 		return nil, fmt.Errorf("failed to select INBOX: %v", err)
@@ -97,6 +111,14 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 				Bcc:         mr.Header.Get("Bcc"),
 				Subject:     msg.Envelope.Subject,
 				Contents:    []string{},
+			}
+
+			if message.Date, err = mr.Header.Date(); err != nil {
+				return nil, fmt.Errorf("failed to load message date: %v", err)
+			}
+
+			if minAge > 0 && message.Date.After(time.Now().Add(-minAge)) || maxAge > 0 && message.Date.Before(time.Now().Add(-maxAge)) {
+				continue
 			}
 
 			for {

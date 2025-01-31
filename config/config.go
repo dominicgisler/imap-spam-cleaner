@@ -35,6 +35,8 @@ type Inbox struct {
 	Inbox    string `yaml:"inbox"    validate:"required"`
 	Spam     string `yaml:"spam"     validate:"required"`
 	MinScore int    `yaml:"minscore" validate:"required"`
+	MinAge   string `yaml:"minage"   validate:"omitempty"`
+	MaxAge   string `yaml:"maxage"   validate:"omitempty"`
 }
 
 func Load() (*Config, error) {
