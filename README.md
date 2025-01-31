@@ -56,4 +56,6 @@ inboxes:                      # inboxes to be checked
     inbox: INBOX              # inbox folder
     spam: INBOX.Spam          # spam folder
     minscore: 75              # min score to detect spam (0-100)
+    minage: 0h                # min age of message
+    maxage: 24h               # max age of message
 ```
