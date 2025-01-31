@@ -1,12 +1,11 @@
 # IMAP spam cleaner
 
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-grey?logo=docker)](https://hub.docker.com/r/dominicgisler/imap-spam-cleaner)
 [![License](https://img.shields.io/github/license/dominicgisler/imap-spam-cleaner)](https://github.com/dominicgisler/imap-spam-cleaner/blob/master/LICENSE)
 [![Issues](https://img.shields.io/github/issues/dominicgisler/imap-spam-cleaner)](https://github.com/dominicgisler/imap-spam-cleaner/issues)
 [![Last commit](https://img.shields.io/github/last-commit/dominicgisler/imap-spam-cleaner/master)](https://github.com/dominicgisler/imap-spam-cleaner/commits/master)
 
 A tool to clean up spam in your imap inbox.
-
-**Work In Progress**
 
 ## How does it work
 
@@ -15,19 +14,43 @@ Depending on a spam score, the message can be moved to the spam folder, keeping 
 
 ## How to use
 
-### From source
+### Using image from docker hub (recommended)
 
-- Install Go version 1.23.4+
-- Clone this repository
-- Load dependencies (`go get ./...`)
-- Create `config.yml` matching your inboxes
-- Run the application (`go run .`)
-
-### With docker
-
-- Build the docker image: `docker build -f Dockerfile -t dominicgisler/imap-spam-cleaner .`
+- Create `config.yml` matching your inboxes (example below)
+- Create `docker-compose.yml` if using `docker compose` (example below)
 - Start the container with: `docker compose up -d`
 - Or with: `docker run -d --name imap-spam-cleaner -v ./config.yml:/app/config.yml dominicgisler/imap-spam-cleaner`
+
+### From source with local Go installation
+
+- Clone this repository
+- Install Go version 1.23.4+
+- Load dependencies (`go get ./...`)
+- Create `config.yml` matching your inboxes (example below)
+- Run the application (`go run .`)
+
+### From source with docker
+
+- Clone this repository
+- Install docker
+- Build the docker image: `docker build -f Dockerfile -t dominicgisler/imap-spam-cleaner .`
+- Create `config.yml` matching your inboxes (example below)
+- Create `docker-compose.yml` if using `docker compose` (example below)
+- Start the container with: `docker compose up -d`
+- Or with: `docker run -d --name imap-spam-cleaner -v ./config.yml:/app/config.yml dominicgisler/imap-spam-cleaner`
+
+### Sample docker-compose.yml
+
+```yaml
+services:
+  imap-spam-cleaner:
+    image: dominicgisler/imap-spam-cleaner:latest
+    container_name: imap-spam-cleaner
+    hostname: imap-spam-cleaner
+    restart: always
+    volumes:
+      - ./config.yml:/app/config.yml:ro
+```
 
 ### Configuration
 
