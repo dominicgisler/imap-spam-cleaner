@@ -58,27 +58,33 @@ Use this configuration as an example for your own setup. Save the file as `confi
 
 ```yaml
 logging:
-  level: debug                # logging level (panic, fatal, error, warn, info, debug, trace)
+  level: debug                    # logging level (panic, fatal, error, warn, info, debug, trace)
 
-providers:                    # providers to be used for inboxes
-  prov1:                      # provider name
-    type: openai              # provider type
-    config:                   # provider specific configuration
-      apikey: some-api-key    # apikey
-      model: gpt-4o-mini      # gpt model to use
-      maxsize: 100000         # message size limit for prompt (bytes)
+providers:                        # providers to be used for inboxes
+  prov1:                          # provider name
+    type: openai                  # provider type
+    config:                       # provider specific configuration
+      apikey: some-api-key        # openai apikey
+      model: gpt-4o-mini          # openai model to use
+      maxsize: 100000             # message size limit for prompt (bytes)
+  prov2:                          # provider name
+    type: ollama                  # provider type
+    config:                       # provider specific configuration
+      url: http://127.0.0.1:11434 # ollama url
+      model: gpt-oss:20b          # ollama model to use
+      maxsize: 100000             # message size limit for prompt (bytes)
 
-inboxes:                      # inboxes to be checked
-  - schedule: "* * * * *"     # schedule in cron format (when to execute spam analysis)
-    host: mail.domain.tld     # imap host
-    port: 143                 # imap port
-    tls: false                # imap tls
-    username: user@domain.tld # imap user
-    password: mypass          # imap password
-    provider: prov1           # provider used for spam analysis
-    inbox: INBOX              # inbox folder
-    spam: INBOX.Spam          # spam folder
-    minscore: 75              # min score to detect spam (0-100)
-    minage: 0h                # min age of message
-    maxage: 24h               # max age of message
+inboxes:                          # inboxes to be checked
+  - schedule: "* * * * *"         # schedule in cron format (when to execute spam analysis)
+    host: mail.domain.tld         # imap host
+    port: 143                     # imap port
+    tls: false                    # imap tls
+    username: user@domain.tld     # imap user
+    password: mypass              # imap password
+    provider: prov1               # provider used for spam analysis
+    inbox: INBOX                  # inbox folder
+    spam: INBOX.Spam              # spam folder
+    minscore: 75                  # min score to detect spam (0-100)
+    minage: 0h                    # min age of message
+    maxage: 24h                   # max age of message
 ```
