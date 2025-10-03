@@ -20,7 +20,7 @@ type Logging struct {
 }
 
 type Provider struct {
-	Type   string            `yaml:"type"   validate:"required,oneof=openai"`
+	Type   string            `yaml:"type"   validate:"required,oneof=openai ollama"`
 	Config map[string]string `yaml:"config" validate:"required"`
 }
 

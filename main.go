@@ -12,7 +12,7 @@ import (
 
 const (
 	appName    = "imap-spam-cleaner"
-	appVersion = "0.2.1"
+	appVersion = "0.3.0"
 )
 
 func init() {
