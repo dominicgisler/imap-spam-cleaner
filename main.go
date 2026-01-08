@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/dominicgisler/imap-spam-cleaner/app"
 	"github.com/dominicgisler/imap-spam-cleaner/config"
 	"github.com/dominicgisler/imap-spam-cleaner/inbox"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
@@ -16,9 +17,13 @@ const (
 	appVersion = "0.3.1"
 )
 
+var options app.Options
+
 func init() {
 	var v bool
 	flag.BoolVar(&v, "version", false, "Show short version")
+	flag.BoolVar(&options.RunNow, "now", false, "Run all inboxes once immediately, ignoring schedule")
+	flag.BoolVar(&options.AnalyzeOnly, "analyze-only", false, "Only analyze emails, do not move or delete them")
 	flag.Parse()
 	if v {
 		fmt.Printf("%s v%s\n", appName, appVersion)
@@ -33,6 +38,12 @@ func main() {
 		logx.Errorf("Could not load config: %v", err)
 		return
 	}
+
+	ctx := app.Context{
+		Config:  c,
+		Options: options,
+	}
+
 	var p provider.Provider
 	for name, prov := range c.Providers {
 		p, err = provider.New(prov.Type)
@@ -45,5 +56,12 @@ func main() {
 			return
 		}
 	}
-	inbox.Schedule(c)
+
+	if ctx.Options.RunNow {
+		logx.Info("Running all inboxes once immediately")
+		inbox.RunAllInboxes(ctx)
+		return
+	}
+
+	inbox.Schedule(ctx)
 }
