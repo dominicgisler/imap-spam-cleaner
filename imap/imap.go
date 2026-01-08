@@ -3,14 +3,15 @@ package imap
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"time"
+
 	"github.com/dominicgisler/imap-spam-cleaner/config"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
 	_ "github.com/emersion/go-message/charset"
 	"github.com/emersion/go-message/mail"
-	"io"
-	"time"
 )
 
 type Imap struct {
@@ -99,7 +100,8 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 
 			mr, err = mail.CreateReader(bytes.NewReader(b))
 			if err != nil {
-				return nil, fmt.Errorf("failed to create mail reader: %v", err)
+				logx.Warnf("failed to create message reader (msg.UID=%d): %v\n", msg.UID, err)
+				continue
 			}
 
 			message := Message{
@@ -114,7 +116,8 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 			}
 
 			if message.Date, err = mr.Header.Date(); err != nil {
-				return nil, fmt.Errorf("failed to load message date: %v", err)
+				logx.Warnf("failed to load message date (msg.UID=%d): %v\n", msg.UID, err)
+				continue
 			}
 
 			if minAge > 0 && message.Date.After(time.Now().Add(-minAge)) || maxAge > 0 && message.Date.Before(time.Now().Add(-maxAge)) {
@@ -126,13 +129,15 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 				if err == io.EOF {
 					break
 				} else if err != nil {
-					return nil, fmt.Errorf("failed to read next part: %v", err)
+					logx.Warnf("failed to read message part (msg.UID=%d): %v\n", msg.UID, err)
+					break
 				}
 
 				switch p.Header.(type) {
 				case *mail.InlineHeader:
 					if b, err = io.ReadAll(p.Body); err != nil {
-						return nil, fmt.Errorf("failed to create mail body: %v", err)
+						logx.Warnf("failed to read message body (msg.UID=%d): %v\n", msg.UID, err)
+						break
 					}
 					message.Contents = append(message.Contents, string(b))
 				}
