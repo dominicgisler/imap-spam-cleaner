@@ -54,6 +54,8 @@ func (i *Imap) Close() {
 
 func (i *Imap) LoadMessages() ([]Message, error) {
 
+	const batchSize = 100
+
 	var err error
 	var mbox *imap.SelectData
 	var msgs []*imapclient.FetchMessageBuffer
@@ -77,73 +79,87 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to select INBOX: %v", err)
 	}
+	logx.Debugf("Found %d messages in inbox", mbox.NumMessages)
 
 	if mbox.NumMessages > 0 {
-		seqSet := imap.SeqSet{}
-		seqSet.AddRange(1, mbox.NumMessages)
 		fetchOptions := &imap.FetchOptions{
-			Envelope:    true,
-			UID:         true,
-			BodySection: []*imap.FetchItemBodySection{{Peek: true}},
-		}
-		msgs, err = i.client.Fetch(seqSet, fetchOptions).Collect()
-		if err != nil {
-			return nil, fmt.Errorf("failed to fetch messages: %v", err)
+			Envelope: true,
+			UID:      true,
+			BodySection: []*imap.FetchItemBodySection{
+				{
+					Peek: true,
+				},
+			},
 		}
 
-		for _, msg := range msgs {
-			var b []byte
-			for _, buf := range msg.BodySection {
-				b = buf
-				break
+		for start := uint32(1); start <= mbox.NumMessages; start += batchSize {
+			end := start + batchSize - 1
+			if end > mbox.NumMessages {
+				end = mbox.NumMessages
 			}
+			logx.Debugf("Loading messages %d-%d", start, end)
 
-			mr, err = mail.CreateReader(bytes.NewReader(b))
+			seqSet := imap.SeqSet{}
+			seqSet.AddRange(start, end)
+			msgs, err = i.client.Fetch(seqSet, fetchOptions).Collect()
 			if err != nil {
-				logx.Warnf("failed to create message reader (msg.UID=%d): %v\n", msg.UID, err)
-				continue
+				return nil, fmt.Errorf("failed to fetch messages: %v", err)
 			}
 
-			message := Message{
-				UID:         msg.UID,
-				DeliveredTo: mr.Header.Get("Delivered-To"),
-				From:        mr.Header.Get("From"),
-				To:          mr.Header.Get("To"),
-				Cc:          mr.Header.Get("Cc"),
-				Bcc:         mr.Header.Get("Bcc"),
-				Subject:     msg.Envelope.Subject,
-				Contents:    []string{},
-			}
-
-			if message.Date, err = mr.Header.Date(); err != nil {
-				logx.Warnf("failed to load message date (msg.UID=%d): %v\n", msg.UID, err)
-				continue
-			}
-
-			if minAge > 0 && message.Date.After(time.Now().Add(-minAge)) || maxAge > 0 && message.Date.Before(time.Now().Add(-maxAge)) {
-				continue
-			}
-
-			for {
-				p, err = mr.NextPart()
-				if err == io.EOF {
-					break
-				} else if err != nil {
-					logx.Warnf("failed to read message part (msg.UID=%d): %v\n", msg.UID, err)
+			for _, msg := range msgs {
+				var b []byte
+				for _, buf := range msg.BodySection {
+					b = buf
 					break
 				}
 
-				switch p.Header.(type) {
-				case *mail.InlineHeader:
-					if b, err = io.ReadAll(p.Body); err != nil {
-						logx.Warnf("failed to read message body (msg.UID=%d): %v\n", msg.UID, err)
+				mr, err = mail.CreateReader(bytes.NewReader(b))
+				if err != nil {
+					logx.Warnf("failed to create message reader (msg.UID=%d): %v\n", msg.UID, err)
+					continue
+				}
+
+				message := Message{
+					UID:         msg.UID,
+					DeliveredTo: mr.Header.Get("Delivered-To"),
+					From:        mr.Header.Get("From"),
+					To:          mr.Header.Get("To"),
+					Cc:          mr.Header.Get("Cc"),
+					Bcc:         mr.Header.Get("Bcc"),
+					Subject:     msg.Envelope.Subject,
+					Contents:    []string{},
+				}
+
+				if message.Date, err = mr.Header.Date(); err != nil {
+					logx.Warnf("failed to load message date (msg.UID=%d): %v\n", msg.UID, err)
+					continue
+				}
+
+				if minAge > 0 && message.Date.After(time.Now().Add(-minAge)) || maxAge > 0 && message.Date.Before(time.Now().Add(-maxAge)) {
+					continue
+				}
+
+				for {
+					p, err = mr.NextPart()
+					if err == io.EOF {
+						break
+					} else if err != nil {
+						logx.Warnf("failed to read message part (msg.UID=%d): %v\n", msg.UID, err)
 						break
 					}
-					message.Contents = append(message.Contents, string(b))
-				}
-			}
 
-			messages = append(messages, message)
+					switch p.Header.(type) {
+					case *mail.InlineHeader:
+						if b, err = io.ReadAll(p.Body); err != nil {
+							logx.Warnf("failed to read message body (msg.UID=%d): %v\n", msg.UID, err)
+							break
+						}
+						message.Contents = append(message.Contents, string(b))
+					}
+				}
+
+				messages = append(messages, message)
+			}
 		}
 	}
 
