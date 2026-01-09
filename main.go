@@ -3,16 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+
 	"github.com/dominicgisler/imap-spam-cleaner/config"
 	"github.com/dominicgisler/imap-spam-cleaner/inbox"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/dominicgisler/imap-spam-cleaner/provider"
-	"os"
 )
 
 const (
 	appName    = "imap-spam-cleaner"
-	appVersion = "0.3.0"
+	appVersion = "0.3.1"
 )
 
 func init() {
