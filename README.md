@@ -1,9 +1,14 @@
 # IMAP spam cleaner
 
-[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-grey?logo=docker)](https://hub.docker.com/r/dominicgisler/imap-spam-cleaner)
-[![License](https://img.shields.io/github/license/dominicgisler/imap-spam-cleaner)](https://github.com/dominicgisler/imap-spam-cleaner/blob/master/LICENSE)
-[![Issues](https://img.shields.io/github/issues/dominicgisler/imap-spam-cleaner)](https://github.com/dominicgisler/imap-spam-cleaner/issues)
-[![Last commit](https://img.shields.io/github/last-commit/dominicgisler/imap-spam-cleaner/master)](https://github.com/dominicgisler/imap-spam-cleaner/commits/master)
+![logo](assets/icon_128.png)
+
+[![Latest release](https://img.shields.io/github/v/release/dominicgisler/imap-spam-cleaner?style=for-the-badge)](https://github.com/dominicgisler/imap-spam-cleaner/releases)
+[![License](https://img.shields.io/github/license/dominicgisler/imap-spam-cleaner?style=for-the-badge)](https://github.com/dominicgisler/imap-spam-cleaner/blob/master/LICENSE)
+[![Issues](https://img.shields.io/github/issues/dominicgisler/imap-spam-cleaner?style=for-the-badge)](https://github.com/dominicgisler/imap-spam-cleaner/issues)
+[![Contributors](https://img.shields.io/github/contributors/dominicgisler/imap-spam-cleaner?style=for-the-badge)](https://github.com/dominicgisler/imap-spam-cleaner/graphs/contributors)
+
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-grey?style=for-the-badge&logo=docker)](https://hub.docker.com/r/dominicgisler/imap-spam-cleaner)
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-grey?style=for-the-badge&logo=ko-fi)](https://ko-fi.com/dominicgisler/tip)
 
 A tool to clean up spam in your imap inbox.
 
@@ -88,3 +93,8 @@ inboxes:                          # inboxes to be checked
     minage: 0h                    # min age of message
     maxage: 24h                   # max age of message
 ```
+
+## Contributors
+
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
