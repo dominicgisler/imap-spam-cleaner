@@ -97,4 +97,17 @@ inboxes:                          # inboxes to be checked
 ## Contributors
 
 <!-- readme: contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/dominicgisler">
+                    <img src="https://avatars.githubusercontent.com/u/13015514?v=4" width="100;" alt="dominicgisler"/>
+                    <br />
+                    <sub><b>Dominic Gisler</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
 <!-- readme: contributors -end -->
