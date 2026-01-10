@@ -1,17 +1,19 @@
 package inbox
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/dominicgisler/imap-spam-cleaner/app"
 	"github.com/dominicgisler/imap-spam-cleaner/config"
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/dominicgisler/imap-spam-cleaner/provider"
 	"github.com/go-co-op/gocron/v2"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
-func Schedule(cfg *config.Config) {
+func Schedule(ctx app.Context) {
 
 	s, err := gocron.NewScheduler()
 	if err != nil {
@@ -19,16 +21,16 @@ func Schedule(cfg *config.Config) {
 		return
 	}
 
-	for i, inbox := range cfg.Inboxes {
+	for i, inbox := range ctx.Config.Inboxes {
 		logx.Infof("Scheduling inbox %s (%s)", inbox.Username, inbox.Schedule)
-		prov, ok := cfg.Providers[inbox.Provider]
+		prov, ok := ctx.Config.Providers[inbox.Provider]
 		if !ok {
 			logx.Errorf("Invalid provider %s for inbox %d", inbox.Provider, i)
 			continue
 		}
 		if _, err = s.NewJob(
 			gocron.CronJob(inbox.Schedule, false),
-			gocron.NewTask(processInbox, inbox, prov),
+			gocron.NewTask(processInbox, ctx, inbox, prov),
 		); err != nil {
 			logx.Errorf("Could not schedule inbox %s (%s): %v", inbox.Username, inbox.Schedule, err)
 		}
@@ -46,7 +48,19 @@ func Schedule(cfg *config.Config) {
 	}
 }
 
-func processInbox(inbox config.Inbox, prov config.Provider) {
+func RunAllInboxes(ctx app.Context) {
+	for i, inbox := range ctx.Config.Inboxes {
+		logx.Infof("Processing inbox %s", inbox.Username)
+		prov, ok := ctx.Config.Providers[inbox.Provider]
+		if !ok {
+			logx.Errorf("Invalid provider %s for inbox %d", inbox.Provider, i)
+			continue
+		}
+		processInbox(ctx, inbox, prov)
+	}
+}
+
+func processInbox(ctx app.Context, inbox config.Inbox, prov config.Provider) {
 
 	var err error
 	var msgs []imap.Message
@@ -90,6 +104,11 @@ func processInbox(inbox config.Inbox, prov config.Provider) {
 		logx.Debugf("Spam score of message #%d (%s): %d/100", m.UID, m.Subject, n)
 
 		if n >= inbox.MinScore {
+			if ctx.Options.AnalyzeOnly {
+				logx.Debugf("Analyze only mode, not moving message #%d", m.UID)
+				continue
+			}
+
 			if err = im.MoveMessage(m.UID, inbox.Spam); err != nil {
 				logx.Errorf("Could not move message (%s): %v\n", m.Subject, err)
 				continue

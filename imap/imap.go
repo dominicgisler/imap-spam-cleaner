@@ -22,6 +22,8 @@ type Imap struct {
 func New(cfg config.Inbox) (*Imap, error) {
 
 	var err error
+	var mailboxes []*imap.ListData
+
 	i := &Imap{
 		cfg: cfg,
 	}
@@ -40,6 +42,16 @@ func New(cfg config.Inbox) (*Imap, error) {
 	if err = i.client.Login(cfg.Username, cfg.Password).Wait(); err != nil {
 		i.Close()
 		return nil, fmt.Errorf("failed to login: %v", err)
+	}
+
+	mailboxes, err = i.client.List("", "*", nil).Collect()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list mailboxes: %v", err)
+	}
+
+	logx.Debug("Available mailboxes:")
+	for _, l := range mailboxes {
+		logx.Debugf("  - %s", l.Mailbox)
 	}
 
 	return i, nil
