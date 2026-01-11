@@ -14,7 +14,7 @@ import (
 
 const (
 	appName    = "imap-spam-cleaner"
-	appVersion = "0.3.1"
+	appVersion = "0.3.2"
 )
 
 var options app.Options
