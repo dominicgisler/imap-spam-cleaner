@@ -107,6 +107,13 @@ inboxes:                          # inboxes to be checked
                     <sub><b>Dominic Gisler</b></sub>
                 </a>
             </td>
+            <td align="center">
+                <a href="https://github.com/nistei">
+                    <img src="https://avatars.githubusercontent.com/u/1652722?v=4" width="100;" alt="nistei"/>
+                    <br />
+                    <sub><b>Niklas Steiner</b></sub>
+                </a>
+            </td>
 		</tr>
 	<tbody>
 </table>
