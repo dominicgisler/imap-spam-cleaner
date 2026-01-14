@@ -14,6 +14,12 @@ providers:                        # providers to be used for inboxes
       url: http://127.0.0.1:11434 # url
       model: gpt-oss:20b          # model to use
       maxsize: 100000             # message size limit for prompt (bytes)
+  prov3:                          # provider name
+    type: spamassassin            # provider type
+    config:                       # provider specific configuration
+      host: 127.0.0.1             # spamassassin host
+      port: 783                   # spamassassin port
+      maxsize: 300000             # message size limit
 
 inboxes:                          # inboxes to be checked
   - schedule: "* * * * *"         # schedule in cron format (when to execute spam analysis)

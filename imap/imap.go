@@ -140,6 +140,7 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 					Bcc:         mr.Header.Get("Bcc"),
 					Subject:     msg.Envelope.Subject,
 					Contents:    []string{},
+					Raw:         b, // Raw original message bytes. Useful for traditional spam filters.
 				}
 
 				if message.Date, err = mr.Header.Date(); err != nil {

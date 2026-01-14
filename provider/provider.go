@@ -2,6 +2,7 @@ package provider
 
 import (
 	"errors"
+
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
 )
 
@@ -13,7 +14,7 @@ type Provider interface {
 }
 
 func New(t string) (Provider, error) {
-	providers := []Provider{&OpenAI{}, &Ollama{}}
+	providers := []Provider{&OpenAI{}, &Ollama{}, &SpamAssassin{}}
 	for _, provider := range providers {
 		if provider.Name() == t {
 			return provider, nil
