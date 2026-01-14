@@ -1,10 +1,11 @@
 package config
 
 import (
+	"os"
+
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
-	"os"
 )
 
 const configPath = "config.yml"
@@ -20,7 +21,7 @@ type Logging struct {
 }
 
 type Provider struct {
-	Type   string            `yaml:"type"   validate:"required,oneof=openai ollama"`
+	Type   string            `yaml:"type"   validate:"required,oneof=openai ollama spamassassin"`
 	Config map[string]string `yaml:"config" validate:"required"`
 }
 

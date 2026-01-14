@@ -1,8 +1,9 @@
 package imap
 
 import (
-	"github.com/emersion/go-imap/v2"
 	"time"
+
+	"github.com/emersion/go-imap/v2"
 )
 
 type Message struct {
@@ -15,4 +16,5 @@ type Message struct {
 	Subject     string
 	Contents    []string
 	Date        time.Time
+	Raw         []byte
 }
