@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/dominicgisler/imap-spam-cleaner/imap"
-	"github.com/dominicgisler/imap-spam-cleaner/logx"
-	"github.com/ollama/ollama/api"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/dominicgisler/imap-spam-cleaner/imap"
+	"github.com/dominicgisler/imap-spam-cleaner/logx"
+	"github.com/ollama/ollama/api"
 )
 
 type Ollama struct {

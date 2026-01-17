@@ -2,6 +2,7 @@ package imap
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -36,17 +37,17 @@ func New(cfg config.Inbox) (*Imap, error) {
 
 	if err != nil {
 		i.Close()
-		return nil, fmt.Errorf("failed to dial IMAP server: %v", err)
+		return nil, fmt.Errorf("failed to dial IMAP server: %w", err)
 	}
 
 	if err = i.client.Login(cfg.Username, cfg.Password).Wait(); err != nil {
 		i.Close()
-		return nil, fmt.Errorf("failed to login: %v", err)
+		return nil, fmt.Errorf("failed to login: %w", err)
 	}
 
 	mailboxes, err = i.client.List("", "*", nil).Collect()
 	if err != nil {
-		return nil, fmt.Errorf("failed to list mailboxes: %v", err)
+		return nil, fmt.Errorf("failed to list mailboxes: %w", err)
 	}
 
 	logx.Debug("Available mailboxes:")
@@ -89,7 +90,7 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 
 	mbox, err = i.client.Select(i.cfg.Inbox, nil).Wait()
 	if err != nil {
-		return nil, fmt.Errorf("failed to select INBOX: %v", err)
+		return nil, fmt.Errorf("failed to select INBOX: %w", err)
 	}
 	logx.Debugf("Found %d messages in inbox", mbox.NumMessages)
 
@@ -115,7 +116,7 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 			seqSet.AddRange(start, end)
 			msgs, err = i.client.Fetch(seqSet, fetchOptions).Collect()
 			if err != nil {
-				return nil, fmt.Errorf("failed to fetch messages: %v", err)
+				return nil, fmt.Errorf("failed to fetch messages: %w", err)
 			}
 
 			for _, msg := range msgs {
@@ -154,7 +155,7 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 
 				for {
 					p, err = mr.NextPart()
-					if err == io.EOF {
+					if errors.Is(err, io.EOF) {
 						break
 					} else if err != nil {
 						logx.Warnf("failed to read message part (msg.UID=%d): %v\n", msg.UID, err)

@@ -1,0 +1,14 @@
+version: "2"
+linters:
+  enable:
+    - errorlint
+    - gocritic
+    - gocyclo
+    - gosec
+    - usestdlibvars
+issues:
+  fix: true
+formatters:
+  enable:
+    - gofmt
+    - goimports
