@@ -122,7 +122,7 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 			for _, msg := range msgs {
 				var b []byte
 				for _, buf := range msg.BodySection {
-					b = buf
+					b = buf.Bytes
 					break
 				}
 

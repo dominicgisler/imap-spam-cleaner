@@ -29,7 +29,7 @@ Depending on a spam score, the message can be moved to the spam folder, keeping 
 ### From source with local Go installation
 
 - Clone this repository
-- Install Go version 1.23.4+
+- Install Go version 1.25+
 - Load dependencies (`go get ./...`)
 - Create `config.yml` matching your inboxes (example below)
 - Run the application (`go run .`)
