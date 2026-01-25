@@ -97,6 +97,20 @@ func processInbox(ctx app.Context, inbox config.Inbox, prov config.Provider) {
 
 	moved := 0
 	for _, m := range msgs {
+		if wl, ok := ctx.Config.Whitelists[inbox.Whitelist]; ok {
+			trustedSender := false
+			for _, rgx := range wl {
+				if rgx.Match([]byte(m.From)) {
+					trustedSender = true
+					break
+				}
+			}
+			if trustedSender {
+				logx.Debugf("Skipping message #%d (%s) because of trusted sender (%s)", m.UID, m.Subject, m.From)
+				continue
+			}
+		}
+
 		if n, err = p.Analyze(m); err != nil {
 			logx.Errorf("Could not analyze message (%s): %v\n", m.Subject, err)
 			continue
