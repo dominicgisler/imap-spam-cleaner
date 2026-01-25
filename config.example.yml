@@ -21,6 +21,14 @@ providers:                        # providers to be used for inboxes
       port: 783                   # spamassassin port
       maxsize: 300000             # message size limit
 
+whitelists:                       # trusted senders as regexp, not to be analyzed
+  whitelist1:                     # example with exact addresses
+    - ^.* <info@example.com>$     # matches <info@example.com>
+    - ^.* <contact@domain.com>$   # matches <contact@domain.com>
+  whitelist2:                     # example with only domain match
+    - ^.* <.*@example.com>$       # matches for all @example.com addresses
+    - ^.* <.*@domain.com>$        # matches for all @domain.com addresses
+
 inboxes:                          # inboxes to be checked
   - schedule: "* * * * *"         # schedule in cron format (when to execute spam analysis)
     host: mail.domain.tld         # imap host
@@ -34,3 +42,4 @@ inboxes:                          # inboxes to be checked
     minscore: 75                  # min score to detect spam (0-100)
     minage: 0h                    # min age of message
     maxage: 24h                   # max age of message
+    whitelist: whitelist1         # whitelist to use, empty/missing = no whitelist

@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"regexp"
 
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/go-playground/validator/v10"
@@ -11,9 +12,10 @@ import (
 const configPath = "config.yml"
 
 type Config struct {
-	Logging   Logging             `yaml:"logging" validate:"required"`
-	Providers map[string]Provider `yaml:"providers" validate:"required,dive"`
-	Inboxes   []Inbox             `yaml:"inboxes"   validate:"required,dive"`
+	Logging    Logging                    `yaml:"logging"    validate:"required"`
+	Providers  map[string]Provider        `yaml:"providers"  validate:"required,dive"`
+	Whitelists map[string][]regexp.Regexp `yaml:"whitelists" validate:"omitempty"`
+	Inboxes    []Inbox                    `yaml:"inboxes"    validate:"required,dive"`
 }
 
 type Logging struct {
@@ -26,18 +28,19 @@ type Provider struct {
 }
 
 type Inbox struct {
-	Schedule string `yaml:"schedule" validate:"required"`
-	Host     string `yaml:"host"     validate:"required"`
-	Port     int    `yaml:"port"     validate:"required"`
-	TLS      bool   `yaml:"tls"      validate:"omitempty"`
-	Username string `yaml:"username" validate:"required"`
-	Password string `yaml:"password" validate:"required"`
-	Provider string `yaml:"provider" validate:"required"`
-	Inbox    string `yaml:"inbox"    validate:"required"`
-	Spam     string `yaml:"spam"     validate:"required"`
-	MinScore int    `yaml:"minscore" validate:"required"`
-	MinAge   string `yaml:"minage"   validate:"omitempty"`
-	MaxAge   string `yaml:"maxage"   validate:"omitempty"`
+	Schedule  string `yaml:"schedule"  validate:"required"`
+	Host      string `yaml:"host"      validate:"required"`
+	Port      int    `yaml:"port"      validate:"required"`
+	TLS       bool   `yaml:"tls"       validate:"omitempty"`
+	Username  string `yaml:"username"  validate:"required"`
+	Password  string `yaml:"password"  validate:"required"`
+	Provider  string `yaml:"provider"  validate:"required"`
+	Inbox     string `yaml:"inbox"     validate:"required"`
+	Spam      string `yaml:"spam"      validate:"required"`
+	MinScore  int    `yaml:"minscore"  validate:"required"`
+	MinAge    string `yaml:"minage"    validate:"omitempty"`
+	MaxAge    string `yaml:"maxage"    validate:"omitempty"`
+	Whitelist string `yaml:"whitelist" validate:"omitempty"`
 }
 
 func Load() (*Config, error) {
