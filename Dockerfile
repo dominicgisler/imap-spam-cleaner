@@ -1,4 +1,4 @@
-FROM golang:1.24.11 AS build
+FROM golang:1.25 AS build
 WORKDIR /app
 COPY . .
 RUN GOOS=linux CGO_ENABLED=0 go build -a -installsuffix cgo -o dist/imap-spam-cleaner
