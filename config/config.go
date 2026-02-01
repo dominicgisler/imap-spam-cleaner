@@ -69,7 +69,7 @@ func Load() (*Config, error) {
 		if _, ok := config.Providers[inbox.Provider]; !ok {
 			return nil, fmt.Errorf("invalid provider %s for inbox #%d", inbox.Provider, i)
 		}
-		if _, ok := config.Whitelists[inbox.Whitelist]; !ok {
+		if _, ok := config.Whitelists[inbox.Whitelist]; inbox.Whitelist != "" && !ok {
 			return nil, fmt.Errorf("invalid whitelist %s for inbox #%d", inbox.Whitelist, i)
 		}
 	}
