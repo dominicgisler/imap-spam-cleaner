@@ -40,10 +40,12 @@ func (p *SpamAssassin) ValidateConfig(config map[string]string) error {
 	// timeout optional (seconds)
 	if config["timeout"] == "" {
 		p.timeout = 5 * time.Second
+	} else if to, err := time.ParseDuration(config["timeout"]); err == nil && to > 0 {
+		p.timeout = to
 	} else {
 		t, err := strconv.ParseFloat(config["timeout"], 64)
 		if err != nil || t <= 0 {
-			return errors.New("spamassassin timeout must be a positive number (seconds)")
+			return errors.New("spamassassin timeout must be a duration (eg. 10s, 1m) or a positive number of seconds")
 		}
 		p.timeout = time.Duration(t * float64(time.Second))
 	}

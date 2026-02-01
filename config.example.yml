@@ -20,6 +20,7 @@ providers:                        # providers to be used for inboxes
       host: 127.0.0.1             # spamassassin host
       port: 783                   # spamassassin port
       maxsize: 300000             # message size limit
+      timeout: 10s                # connection timeout
 
 whitelists:                       # trusted senders as regexp, not to be analyzed
   whitelist1:                     # example with exact addresses
