@@ -82,10 +82,10 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 
 	searchCrit := &imap.SearchCriteria{}
 	if i.cfg.MinAge > 0 {
-		searchCrit.Before = time.Now().Add(-minAge)
+		searchCrit.Before = time.Now().Add(-i.cfg.MinAge)
 	}
 	if i.cfg.MaxAge > 0 {
-		searchCrit.Since = time.Now().Add(-maxAge)
+		searchCrit.Since = time.Now().Add(-i.cfg.MaxAge)
 	}
 
 	uidRes, err := i.client.UIDSearch(searchCrit, nil).Wait()
@@ -110,7 +110,7 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 
 	msgs, err = i.client.Fetch(uidRes.All, fetchOptions).Collect()
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch messages: %v", err)
+		return nil, fmt.Errorf("failed to fetch messages: %w", err)
 	}
 
 	for _, msg := range msgs {
