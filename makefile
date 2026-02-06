@@ -2,7 +2,7 @@
 .DEFAULT_GOAL := default
 
 default: --tag
-	@docker build -f Dockerfile -t dominicgisler/imap-spam-cleaner:$(TAG) .
+	@docker build --platform linux/amd64,linux/arm64 -f Dockerfile -t dominicgisler/imap-spam-cleaner:$(TAG) .
 
 lint:
 	@golangci-lint run

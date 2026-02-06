@@ -2,6 +2,7 @@ package imap
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -36,17 +37,17 @@ func New(cfg config.Inbox) (*Imap, error) {
 
 	if err != nil {
 		i.Close()
-		return nil, fmt.Errorf("failed to dial IMAP server: %v", err)
+		return nil, fmt.Errorf("failed to dial IMAP server: %w", err)
 	}
 
 	if err = i.client.Login(cfg.Username, cfg.Password).Wait(); err != nil {
 		i.Close()
-		return nil, fmt.Errorf("failed to login: %v", err)
+		return nil, fmt.Errorf("failed to login: %w", err)
 	}
 
 	mailboxes, err = i.client.List("", "*", nil).Collect()
 	if err != nil {
-		return nil, fmt.Errorf("failed to list mailboxes: %v", err)
+		return nil, fmt.Errorf("failed to list mailboxes: %w", err)
 	}
 
 	logx.Debug("Available mailboxes:")
@@ -73,29 +74,17 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 	var p *mail.Part
 	var messages []Message
 
-	var minAge, maxAge time.Duration
-	if i.cfg.MinAge != "" {
-		if minAge, err = time.ParseDuration(i.cfg.MinAge); err != nil {
-			logx.Warnf("failed to parse min age: %v", err)
-		}
-	}
-	if i.cfg.MaxAge != "" {
-		if maxAge, err = time.ParseDuration(i.cfg.MaxAge); err != nil {
-			logx.Warnf("failed to parse max age: %v", err)
-		}
-	}
-
 	mbox, err = i.client.Select(i.cfg.Inbox, nil).Wait()
 	if err != nil {
-		return nil, fmt.Errorf("failed to select INBOX: %v", err)
+		return nil, fmt.Errorf("failed to select INBOX: %w", err)
 	}
 	logx.Debugf("Found %d messages in inbox", mbox.NumMessages)
 
 	searchCrit := &imap.SearchCriteria{}
-	if minAge > 0 {
+	if i.cfg.MinAge > 0 {
 		searchCrit.Before = time.Now().Add(-minAge)
 	}
-	if maxAge > 0 {
+	if i.cfg.MaxAge > 0 {
 		searchCrit.Since = time.Now().Add(-maxAge)
 	}
 
@@ -127,7 +116,7 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 	for _, msg := range msgs {
 		var b []byte
 		for _, buf := range msg.BodySection {
-			b = buf
+			b = buf.Bytes
 			break
 		}
 
@@ -146,6 +135,7 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 			Bcc:         mr.Header.Get("Bcc"),
 			Subject:     msg.Envelope.Subject,
 			Contents:    []string{},
+			Raw:         b, // Raw original message bytes. Useful for traditional spam filters.
 		}
 
 		if message.Date, err = mr.Header.Date(); err != nil {
@@ -153,14 +143,14 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 			continue
 		}
 
-		if minAge > 0 && message.Date.After(time.Now().Add(-minAge)) || maxAge > 0 && message.Date.Before(time.Now().Add(-maxAge)) {
+		if i.cfg.MinAge > 0 && message.Date.After(time.Now().Add(-i.cfg.MinAge)) || i.cfg.MaxAge > 0 && message.Date.Before(time.Now().Add(-i.cfg.MaxAge)) {
 			logx.Debugf("skipping message because date is not in range (msg.UID=%d)", msg.UID)
 			continue
 		}
 
 		for {
 			p, err = mr.NextPart()
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				break
 			} else if err != nil {
 				logx.Warnf("failed to read message part (msg.UID=%d): %v\n", msg.UID, err)

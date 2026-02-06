@@ -1,0 +1,68 @@
+name: Docker release
+
+on:
+  release:
+    types: [published]
+
+env:
+  IMAGE_NAME: dominicgisler/imap-spam-cleaner
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "Tag detected: $TAG"
+
+          if [[ ! "$TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "Invalid tag format (expected vX.Y.Z)"
+            exit 1
+          fi
+
+          MAJOR="${BASH_REMATCH[1]}"
+          MINOR="${BASH_REMATCH[2]}"
+          PATCH="${BASH_REMATCH[3]}"
+
+          VERSION="${MAJOR}.${MINOR}.${PATCH}"
+
+          echo "version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "tag_patch=v$VERSION" >> $GITHUB_OUTPUT
+          echo "tag_minor=v${MAJOR}.${MINOR}" >> $GITHUB_OUTPUT
+          echo "tag_major=v${MAJOR}" >> $GITHUB_OUTPUT
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.tag_patch }}
+            ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.tag_minor }}
+            ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.tag_major }}
+            ${{ env.IMAGE_NAME }}:latest

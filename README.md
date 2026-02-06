@@ -29,7 +29,7 @@ Depending on a spam score, the message can be moved to the spam folder, keeping 
 ### From source with local Go installation
 
 - Clone this repository
-- Install Go version 1.23.4+
+- Install Go version 1.25+
 - Load dependencies (`go get ./...`)
 - Create `config.yml` matching your inboxes (example below)
 - Run the application (`go run .`)
@@ -78,6 +78,21 @@ providers:                        # providers to be used for inboxes
       url: http://127.0.0.1:11434 # ollama url
       model: gpt-oss:20b          # ollama model to use
       maxsize: 100000             # message size limit for prompt (bytes)
+  prov3:                          # provider name
+    type: spamassassin            # provider type
+    config:                       # provider specific configuration
+      host: 127.0.0.1             # spamassassin host
+      port: 783                   # spamassassin port
+      maxsize: 300000             # message size limit
+      timeout: 10s                # connection timeout
+
+whitelists:                       # trusted senders as regexp, not to be analyzed
+  whitelist1:                     # example with exact addresses
+    - ^.* <info@example.com>$     # matches <info@example.com>
+    - ^.* <contact@domain.com>$   # matches <contact@domain.com>
+  whitelist2:                     # example with only domain match
+    - ^.* <.*@example.com>$       # matches for all @example.com addresses
+    - ^.* <.*@domain.com>$        # matches for all @domain.com addresses
 
 inboxes:                          # inboxes to be checked
   - schedule: "* * * * *"         # schedule in cron format (when to execute spam analysis)
@@ -92,6 +107,7 @@ inboxes:                          # inboxes to be checked
     minscore: 75                  # min score to detect spam (0-100)
     minage: 0h                    # min age of message
     maxage: 24h                   # max age of message
+    whitelist: whitelist1         # whitelist to use, empty/missing = no whitelist
 ```
 
 ## Contributors
