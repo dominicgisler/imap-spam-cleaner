@@ -12,11 +12,9 @@ import (
 	"github.com/dominicgisler/imap-spam-cleaner/provider"
 )
 
-const (
-	appName    = "imap-spam-cleaner"
-	appVersion = "0.5.2"
-)
+const name = "imap-spam-cleaner"
 
+var version = "dev"
 var options app.Options
 
 func init() {
@@ -26,13 +24,13 @@ func init() {
 	flag.BoolVar(&options.AnalyzeOnly, "analyze-only", false, "Only analyze emails, do not move or delete them")
 	flag.Parse()
 	if v {
-		fmt.Printf("%s v%s\n", appName, appVersion)
+		fmt.Printf("%s %s\n", name, version)
 		os.Exit(0)
 	}
 }
 
 func main() {
-	logx.Infof("Starting %s v%s", appName, appVersion)
+	logx.Infof("Starting %s %s", name, version)
 	c, err := config.Load()
 	if err != nil {
 		logx.Errorf("Could not load config: %v", err)
