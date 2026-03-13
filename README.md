@@ -12,6 +12,8 @@
 
 A tool to clean up spam in your imap inbox.
 
+Check the [Wiki](https://github.com/dominicgisler/imap-spam-cleaner/wiki) for detailed information.
+
 ## How does it work
 
 This application loads mails from configured imap inboxes and checks their contents using the defined provider.
