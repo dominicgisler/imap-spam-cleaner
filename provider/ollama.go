@@ -3,21 +3,18 @@ package provider
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
 
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
-	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/ollama/ollama/api"
 )
 
 type Ollama struct {
-	client  *api.Client
-	url     *url.URL
-	model   string
-	maxsize int
+	AIBase
+	client *api.Client
+	url    *url.URL
 }
 
 func (p *Ollama) Name() string {
@@ -60,36 +57,13 @@ func (p *Ollama) Init(config map[string]string) error {
 
 func (p *Ollama) Analyze(msg imap.Message) (int, error) {
 
-	cont := ""
-	contLen := 0
-	for _, cnt := range msg.Contents {
-		contLen += len(cnt)
-		if contLen > p.maxsize {
-			logx.Debugf("skipping bytes for message #%d (%s)", msg.UID, msg.Subject)
-			break
-		}
-		cont += cnt + "\n"
-	}
-
 	b := false
 	req := api.ChatRequest{
 		Model: p.model,
 		Messages: []api.Message{
 			{
-				Role: "system",
-				Content: fmt.Sprintf(
-					"Analyze the following email for its spam potential.\n"+
-						"Return a spam score between 0 and 100. Only answer with the number itself.\n\n"+
-						"From: %s\nTo: %s\nDelivered-To: %s\nCc: %s\nBcc: %s\nSubject: %s\n\n"+
-						"Content:\n%s",
-					msg.From,
-					msg.To,
-					msg.DeliveredTo,
-					msg.Cc,
-					msg.Bcc,
-					msg.Subject,
-					cont,
-				),
+				Role:    "system",
+				Content: p.buildPrompt(msg),
 			},
 		},
 		Stream: &b,
