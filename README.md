@@ -57,7 +57,7 @@ INFO   [2026-02-28T16:55:32Z] Moved 4 messages
 ### From source with local Go installation
 
 - Clone this repository
-- Install Go version 1.25+
+- Install Go version 1.26+
 - Load dependencies (`go get ./...`)
 - Create `config.yml` matching your inboxes (example below)
 - Run the application (`go run .`)
