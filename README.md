@@ -100,6 +100,19 @@ providers:                        # providers to be used for inboxes
       apikey: some-api-key        # openai apikey
       model: gpt-4o-mini          # openai model to use
       maxsize: 100000             # message size limit for prompt (bytes)
+      prompt: |                   # prompt to be sent to the model
+        Analyze the following email for its spam potential.
+        Return a spam score between 0 and 100. Only answer with the number itself.
+
+        From: {{.From}}
+        To: {{.To}}
+        Delivered-To: {{.DeliveredTo}}
+        Cc: {{.Cc}}
+        Bcc: {{.Bcc}}
+        Subject: {{.Subject}}
+
+        Content:
+        {{.Content}}
   prov2:                          # provider name
     type: ollama                  # provider type
     config:                       # provider specific configuration
