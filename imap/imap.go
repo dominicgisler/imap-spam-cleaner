@@ -99,8 +99,9 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 	}
 
 	fetchOptions := &imap.FetchOptions{
-		Envelope: true,
-		UID:      true,
+		Envelope:     true,
+		InternalDate: true,
+		UID:          true,
 		BodySection: []*imap.FetchItemBodySection{
 			{
 				Peek: true,
@@ -141,6 +142,10 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 		if message.Date, err = mr.Header.Date(); err != nil {
 			logx.Warnf("failed to load message date (msg.UID=%d): %v\n", msg.UID, err)
 			continue
+		}
+		if message.Date.IsZero() {
+			logx.Debugf("message has no Date header, falling back to INTERNALDATE (msg.UID=%d)", msg.UID)
+			message.Date = msg.InternalDate
 		}
 
 		if i.cfg.MinAge > 0 && message.Date.After(time.Now().Add(-i.cfg.MinAge)) || i.cfg.MaxAge > 0 && message.Date.Before(time.Now().Add(-i.cfg.MaxAge)) {
