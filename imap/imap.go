@@ -140,10 +140,9 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 		}
 
 		if message.Date, err = mr.Header.Date(); err != nil {
-			logx.Warnf("failed to load message date (msg.UID=%d): %v\n", msg.UID, err)
-			continue
-		}
-		if message.Date.IsZero() {
+			logx.Debugf("failed to parse Date header, falling back to INTERNALDATE (msg.UID=%d): %v", msg.UID, err)
+			message.Date = msg.InternalDate
+		} else if message.Date.IsZero() {
 			logx.Debugf("message has no Date header, falling back to INTERNALDATE (msg.UID=%d)", msg.UID)
 			message.Date = msg.InternalDate
 		}
