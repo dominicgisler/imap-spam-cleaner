@@ -171,6 +171,13 @@ inboxes:                          # inboxes to be checked
                     <sub><b>Niklas Steiner</b></sub>
                 </a>
             </td>
+            <td align="center">
+                <a href="https://github.com/alanpbaldwin">
+                    <img src="https://avatars.githubusercontent.com/u/1648277?v=4" width="100;" alt="alanpbaldwin"/>
+                    <br />
+                    <sub><b>alanpbaldwin</b></sub>
+                </a>
+            </td>
 		</tr>
 	<tbody>
 </table>
