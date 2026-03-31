@@ -12,7 +12,7 @@
 
 A tool to clean up spam in your imap inbox.
 
-Check the [Wiki](https://github.com/dominicgisler/imap-spam-cleaner/wiki) for detailed information.
+Check the [Documentation](https://github.com/dominicgisler/imap-spam-cleaner/tree/master/docs) for detailed information.
 
 ## How does it work
 

@@ -1,4 +1,4 @@
-.PHONY: default lint publish --tag
+.PHONY: default lint docs publish --tag
 .DEFAULT_GOAL := default
 
 default: --tag
@@ -6,6 +6,9 @@ default: --tag
 
 lint:
 	@golangci-lint run
+
+docs:
+	@docker run --rm -it -p 8000:8000 -v $(PWD):/docs squidfunk/mkdocs-material
 
 publish: --tag
 	@docker push dominicgisler/imap-spam-cleaner:$(TAG)
