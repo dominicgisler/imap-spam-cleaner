@@ -6,7 +6,6 @@ import (
 	"syscall"
 
 	"github.com/dominicgisler/imap-spam-cleaner/app"
-	"github.com/dominicgisler/imap-spam-cleaner/config"
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/dominicgisler/imap-spam-cleaner/provider"
@@ -60,7 +59,7 @@ func RunAllInboxes(ctx app.Context) {
 	}
 }
 
-func processInbox(ctx app.Context, inbox config.Inbox, prov config.Provider) {
+func processInbox(ctx app.Context, inbox app.Inbox, prov app.Provider) {
 
 	var err error
 	var msgs []imap.Message

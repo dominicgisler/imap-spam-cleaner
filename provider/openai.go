@@ -65,6 +65,10 @@ func (p *OpenAI) Analyze(msg imap.Message) (int, error) {
 		return 0, err
 	}
 
+	if len(resp.Choices) == 0 {
+		return 0, errors.New("empty openai response")
+	}
+
 	i, err := strconv.ParseInt(resp.Choices[0].Message.Content, 10, 64)
 	if err != nil {
 		return 0, err
