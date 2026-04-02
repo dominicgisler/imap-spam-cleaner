@@ -41,7 +41,8 @@ nav:
     - Whitelists: configuration/whitelists.md
     - Inboxes: configuration/inboxes.md
   - Providers:
-      - AI: providers/ai.md
+      - Overview: providers/index.md
       - OpenAI: providers/openai.md
       - Ollama: providers/ollama.md
+      - Gemini: providers/gemini.md
       - SpamAssassin: providers/spamassassin.md

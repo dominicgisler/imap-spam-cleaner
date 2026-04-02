@@ -34,6 +34,12 @@ providers:                        # providers to be used for inboxes
       port: 783                   # spamassassin port
       maxsize: 300000             # message size limit
       timeout: 10s                # connection timeout
+  prov4:                          # provider name
+    type: gemini                  # provider type
+    config:                       # provider specific configuration
+      apikey: some-api-key        # apikey
+      model: gemini-2.5-flash     # model to use
+      maxsize: 100000             # message size limit for prompt (bytes)
 
 whitelists:                       # trusted senders as regexp, not to be analyzed
   whitelist1:                     # example with exact addresses
