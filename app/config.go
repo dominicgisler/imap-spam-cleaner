@@ -1,4 +1,4 @@
-package config
+package app
 
 import (
 	"fmt"
@@ -45,7 +45,7 @@ type Inbox struct {
 	Whitelist string        `yaml:"whitelist" validate:"omitempty"`
 }
 
-func Load() (*Config, error) {
+func LoadConfig() (*Config, error) {
 
 	data, err := os.ReadFile(configPath)
 	if err != nil {

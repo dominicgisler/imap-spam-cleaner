@@ -7,7 +7,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/dominicgisler/imap-spam-cleaner/config"
+	"github.com/dominicgisler/imap-spam-cleaner/app"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
@@ -17,10 +17,10 @@ import (
 
 type Imap struct {
 	client *imapclient.Client
-	cfg    config.Inbox
+	cfg    app.Inbox
 }
 
-func New(cfg config.Inbox) (*Imap, error) {
+func New(cfg app.Inbox) (*Imap, error) {
 
 	var err error
 	var mailboxes []*imap.ListData
