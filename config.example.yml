@@ -8,31 +8,39 @@ providers:                        # providers to be used for inboxes
       apikey: some-api-key        # apikey
       model: gpt-4o-mini          # gpt model to use
       maxsize: 100000             # message size limit for prompt (bytes)
-      prompt: |                   # prompt to be sent to the model
-        Analyze the following email for its spam potential.
-        Return a spam score between 0 and 100. Only answer with the number itself.
-
-        Headers:
-        {{.Headers}}
-
-        From: {{.From}}
-        To: {{.To}}
-        Delivered-To: {{.DeliveredTo}}
-        Cc: {{.Cc}}
-        Bcc: {{.Bcc}}
-        Subject: {{.Subject}}
-
-        Text body:
-        {{.TextBody}}
-
-        HTML body:
-        {{.HtmlBody}}
+      # temperature: 0.2          # optional: sampling temperature (0.0-2.0)
+      # top_p: 0.95               # optional: nucleus sampling probability
+      # max_tokens: 512           # optional: max tokens in the response
+      # system_prompt: |          # optional: system role instructions (persona/rules)
+      #   You are a spam classification assistant. Analyze emails objectively and respond only with a numeric score.
+      # user_prompt: |            # optional: user role template with email data (replaces legacy "prompt")
+      #   Analyze the following email for its spam potential.
+      #   Return a spam score between 0 and 100. Only answer with the number itself.
+      #
+      #   Headers:
+      #   {{.Headers}}
+      #
+      #   From: {{.From}}
+      #   To: {{.To}}
+      #   Delivered-To: {{.DeliveredTo}}
+      #   Cc: {{.Cc}}
+      #   Bcc: {{.Bcc}}
+      #   Subject: {{.Subject}}
+      #
+      #   Text body:
+      #   {{.TextBody}}
+      #
+      #   HTML body:
+      #   {{.HtmlBody}}
   prov2:                          # provider name
     type: ollama                  # provider type
     config:                       # provider specific configuration
       url: http://127.0.0.1:11434 # url
       model: gpt-oss:20b          # model to use
       maxsize: 100000             # message size limit for prompt (bytes)
+      # temperature: 0.2          # optional: sampling temperature
+      # top_p: 0.95               # optional: nucleus sampling probability
+      # max_tokens: 512           # optional: max tokens in the response (maps to num_predict)
   prov3:                          # provider name
     type: spamassassin            # provider type
     config:                       # provider specific configuration
@@ -46,6 +54,9 @@ providers:                        # providers to be used for inboxes
       apikey: some-api-key        # apikey
       model: gemini-2.5-flash     # model to use
       maxsize: 100000             # message size limit for prompt (bytes)
+      # temperature: 0.2          # optional: sampling temperature
+      # top_p: 0.95               # optional: nucleus sampling probability
+      # max_tokens: 512           # optional: max output tokens
 
 whitelists:                       # trusted senders as regexp, not to be analyzed
   whitelist1:                     # example with exact addresses
