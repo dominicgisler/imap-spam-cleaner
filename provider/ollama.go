@@ -96,3 +96,11 @@ func (p *Ollama) Analyze(msg imap.Message) (int, error) {
 
 	return int(i), nil
 }
+
+func checkTCP(addr string, timeout time.Duration) error {
+	conn, err := net.DialTimeout("tcp", addr, timeout)
+	if err != nil {
+		return err
+	}
+	return conn.Close()
+}

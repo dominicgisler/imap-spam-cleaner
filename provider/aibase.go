@@ -182,3 +182,16 @@ func (p *AIBase) buildUserPrompt(msg imap.Message) (string, error) {
 
 	return buf.String(), nil
 }
+
+func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
+	userPrompt, err := p.buildUserPrompt(msg)
+	if err != nil {
+		return "", err
+	}
+
+	if p.systemPrompt == "" {
+		return userPrompt, nil
+	}
+
+	return p.systemPrompt + "\n\n" + userPrompt, nil
+}
