@@ -3,9 +3,11 @@ package provider
 import (
 	"context"
 	"errors"
+	"net"
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
 	"github.com/ollama/ollama/api"
@@ -48,49 +50,40 @@ func (p *Ollama) Init(config map[string]string) error {
 	return nil
 }
 
+func (p *Ollama) HealthCheck(config map[string]string) error {
+	if err := p.Init(config); err != nil {
+		return err
+	}
+
+	host := p.url.Hostname()
+	port := p.url.Port()
+	if port == "" {
+		if p.url.Scheme == "https" {
+			port = "443"
+		} else {
+			port = "80"
+		}
+	}
+	return checkTCP(net.JoinHostPort(host, port), 5*time.Second)
+}
+
 func (p *Ollama) Analyze(msg imap.Message) (int, error) {
 
-	userContent, err := p.buildUserPrompt(msg)
+	prompt, err := p.buildPrompt(msg)
 	if err != nil {
 		return 0, err
 	}
 
-	messages := []api.Message{}
-	if p.systemPrompt != "" {
-		messages = append(messages, api.Message{
-			Role:    "system",
-			Content: p.systemPrompt,
-		})
-	}
-	messages = append(messages, api.Message{
-		Role:    "user",
-		Content: userContent,
-	})
-
 	b := false
-	req := api.ChatRequest{
-		Model:    p.model,
-		Messages: messages,
-		Stream:   &b,
-	}
-
-	if p.temperature != nil || p.topP != nil || p.maxTokens != nil {
-		opts := map[string]any{}
-		if p.temperature != nil {
-			opts["temperature"] = *p.temperature
-		}
-		if p.topP != nil {
-			opts["top_p"] = *p.topP
-		}
-		if p.maxTokens != nil {
-			opts["num_predict"] = *p.maxTokens
-		}
-		req.Options = opts
+	req := api.GenerateRequest{
+		Model:  p.model,
+		Prompt: prompt,
+		Stream: &b,
 	}
 
 	var resp string
-	if err = p.client.Chat(context.Background(), &req, func(response api.ChatResponse) error {
-		resp = response.Message.Content
+	if err = p.client.Generate(context.Background(), &req, func(response api.GenerateResponse) error {
+		resp = response.Response
 		return nil
 	}); err != nil {
 		return 0, err
