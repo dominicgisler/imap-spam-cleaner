@@ -157,17 +157,7 @@ func HTMLToSimpleMarkdown(r io.Reader) (string, error) {
 		// Only strip when the matched line ends with "wrote:" so that innocent
 		// phrases like "On the topic of..." or "On Monday we decided..." are
 		// left untouched.
-		{"\non ", 100, func(s string, idx int) bool {
-			lineStart := idx + 1 // skip the leading '\n'
-			lineEnd := strings.Index(s[lineStart:], "\n")
-			var line string
-			if lineEnd < 0 {
-				line = s[lineStart:]
-			} else {
-				line = s[lineStart : lineStart+lineEnd]
-			}
-			return strings.HasSuffix(strings.TrimSpace(line), "wrote:")
-		}},
+		{"\non ", 100, isGmailStyleQuoteHeader},
 		// "From:" header block at start of a line (forwarded-message header).
 		// Require a minimum offset so that a legitimate opening like "From: our
 		// team" near the top is not accidentally trimmed.
@@ -182,4 +172,22 @@ func HTMLToSimpleMarkdown(r io.Reader) (string, error) {
 	}
 
 	return out, nil
+}
+
+// isGmailStyleQuoteHeader reports whether the "on " match at idx in the
+// lowercased string s is the start of a Gmail/Thunderbird quoted-reply
+// introduction of the form "On <date>, <sender> wrote:".
+// It extracts the line that begins at idx+1 (skipping the leading '\n') and
+// checks that it ends with "wrote:", avoiding false positives on phrases like
+// "on the topic of..." or "on Monday we decided...".
+func isGmailStyleQuoteHeader(s string, idx int) bool {
+	lineStart := idx + 1 // skip the leading '\n'
+	lineEnd := strings.Index(s[lineStart:], "\n")
+	var line string
+	if lineEnd < 0 {
+		line = s[lineStart:]
+	} else {
+		line = s[lineStart : lineStart+lineEnd]
+	}
+	return strings.HasSuffix(strings.TrimSpace(line), "wrote:")
 }
