@@ -18,26 +18,9 @@ import (
 // signals tend to be denser in the HTML part.
 const textBodyDivisor = 4
 
-type AIBase struct {
-	model   string
-	maxsize int
-	prompt  *template.Template
-}
+const defaultSystemPrompt = `You are a spam classification assistant. Analyze emails objectively and respond only with a numeric score.`
 
-func (p *AIBase) ValidateConfig(config map[string]string) error {
-
-	if config["model"] == "" {
-		return errors.New("ai model is required")
-	}
-	p.model = config["model"]
-
-	n, err := strconv.ParseInt(config["maxsize"], 10, 64)
-	if err != nil || n < 1 {
-		return errors.New("maxsize must be a positive integer")
-	}
-	p.maxsize = int(n)
-
-	prompt := `
+const defaultUserPrompt = `
 Analyze the following email for its spam potential.
 Return a spam score between 0 and 100. Only answer with the number itself.
 
@@ -57,19 +40,79 @@ Text body:
 HTML body (converted to Markdown):
 {{.HtmlBody}}
 `
-	if config["prompt"] != "" {
-		prompt = config["prompt"]
+
+type AIBase struct {
+	model        string
+	maxsize      int
+	systemPrompt string
+	userPrompt   *template.Template
+	temperature  *float32
+	topP         *float32
+	maxTokens    *int32
+}
+
+func (p *AIBase) ValidateConfig(config map[string]string) error {
+
+	if config["model"] == "" {
+		return errors.New("ai model is required")
+	}
+	p.model = config["model"]
+
+	n, err := strconv.ParseInt(config["maxsize"], 10, 64)
+	if err != nil || n < 1 {
+		return errors.New("maxsize must be a positive integer")
+	}
+	p.maxsize = int(n)
+
+	p.systemPrompt = defaultSystemPrompt
+	if config["system_prompt"] != "" {
+		p.systemPrompt = config["system_prompt"]
 	}
 
-	p.prompt, err = template.New("prompt").Parse(prompt)
+	// "user_prompt" is the canonical key; "prompt" is kept for backward compatibility.
+	userPromptStr := defaultUserPrompt
+	if config["user_prompt"] != "" {
+		userPromptStr = config["user_prompt"]
+	} else if config["prompt"] != "" {
+		userPromptStr = config["prompt"]
+	}
+
+	p.userPrompt, err = template.New("user_prompt").Parse(userPromptStr)
 	if err != nil {
 		return err
+	}
+
+	if s := config["temperature"]; s != "" {
+		f, err := strconv.ParseFloat(s, 32)
+		if err != nil {
+			return errors.New("temperature must be a float")
+		}
+		v := float32(f)
+		p.temperature = &v
+	}
+
+	if s := config["top_p"]; s != "" {
+		f, err := strconv.ParseFloat(s, 32)
+		if err != nil {
+			return errors.New("top_p must be a float")
+		}
+		v := float32(f)
+		p.topP = &v
+	}
+
+	if s := config["max_tokens"]; s != "" {
+		n, err := strconv.ParseInt(s, 10, 32)
+		if err != nil || n < 1 {
+			return errors.New("max_tokens must be a positive integer")
+		}
+		v := int32(n)
+		p.maxTokens = &v
 	}
 
 	return nil
 }
 
-func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
+func (p *AIBase) buildUserPrompt(msg imap.Message) (string, error) {
 
 	textBody := msg.TextBody
 	htmlBody := msg.HtmlBody
@@ -123,7 +166,7 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 	}
 
 	var buf bytes.Buffer
-	if err := p.prompt.Execute(&buf, TplVars{
+	if err := p.userPrompt.Execute(&buf, TplVars{
 		From:        msg.From,
 		To:          msg.To,
 		DeliveredTo: msg.DeliveredTo,
@@ -134,7 +177,7 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 		TextBody:    textBody,
 		HtmlBody:    htmlBody,
 	}); err != nil {
-		return "", errors.New("prompt template error: " + err.Error())
+		return "", errors.New("user_prompt template error: " + err.Error())
 	}
 
 	return buf.String(), nil

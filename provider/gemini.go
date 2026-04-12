@@ -54,24 +54,32 @@ func (p *Gemini) Init(config map[string]string) error {
 
 func (p *Gemini) Analyze(msg imap.Message) (int, error) {
 
-	prompt, err := p.buildPrompt(msg)
+	userContent, err := p.buildUserPrompt(msg)
 	if err != nil {
 		return 0, err
+	}
+
+	cfg := &genai.GenerateContentConfig{}
+	if p.systemPrompt != "" {
+		cfg.SystemInstruction = &genai.Content{
+			Parts: []*genai.Part{{Text: p.systemPrompt}},
+		}
+	}
+	if p.temperature != nil {
+		cfg.Temperature = p.temperature
+	}
+	if p.topP != nil {
+		cfg.TopP = p.topP
+	}
+	if p.maxTokens != nil {
+		cfg.MaxOutputTokens = *p.maxTokens
 	}
 
 	resp, err := p.client.Models.GenerateContent(
 		context.Background(),
 		p.model,
-		[]*genai.Content{
-			{
-				Parts: []*genai.Part{
-					{
-						Text: prompt,
-					},
-				},
-			},
-		},
-		nil,
+		genai.Text(userContent),
+		cfg,
 	)
 
 	if err != nil {

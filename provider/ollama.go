@@ -50,21 +50,42 @@ func (p *Ollama) Init(config map[string]string) error {
 
 func (p *Ollama) Analyze(msg imap.Message) (int, error) {
 
-	prompt, err := p.buildPrompt(msg)
+	userContent, err := p.buildUserPrompt(msg)
 	if err != nil {
 		return 0, err
 	}
 
+	messages := []api.Message{}
+	if p.systemPrompt != "" {
+		messages = append(messages, api.Message{
+			Role:    "system",
+			Content: p.systemPrompt,
+		})
+	}
+	messages = append(messages, api.Message{
+		Role:    "user",
+		Content: userContent,
+	})
+
 	b := false
 	req := api.ChatRequest{
-		Model: p.model,
-		Messages: []api.Message{
-			{
-				Role:    "system",
-				Content: prompt,
-			},
-		},
-		Stream: &b,
+		Model:    p.model,
+		Messages: messages,
+		Stream:   &b,
+	}
+
+	if p.temperature != nil || p.topP != nil || p.maxTokens != nil {
+		opts := map[string]any{}
+		if p.temperature != nil {
+			opts["temperature"] = *p.temperature
+		}
+		if p.topP != nil {
+			opts["top_p"] = *p.topP
+		}
+		if p.maxTokens != nil {
+			opts["num_predict"] = *p.maxTokens
+		}
+		req.Options = opts
 	}
 
 	var resp string

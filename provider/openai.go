@@ -43,23 +43,38 @@ func (p *OpenAI) Init(config map[string]string) error {
 
 func (p *OpenAI) Analyze(msg imap.Message) (int, error) {
 
-	prompt, err := p.buildPrompt(msg)
+	userContent, err := p.buildUserPrompt(msg)
 	if err != nil {
 		return 0, err
 	}
 
-	resp, err := p.client.CreateChatCompletion(
-		context.Background(),
-		openai.ChatCompletionRequest{
-			Model: p.model,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    openai.ChatMessageRoleSystem,
-					Content: prompt,
-				},
-			},
-		},
-	)
+	messages := []openai.ChatCompletionMessage{}
+	if p.systemPrompt != "" {
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleSystem,
+			Content: p.systemPrompt,
+		})
+	}
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: userContent,
+	})
+
+	req := openai.ChatCompletionRequest{
+		Model:    p.model,
+		Messages: messages,
+	}
+	if p.temperature != nil {
+		req.Temperature = *p.temperature
+	}
+	if p.topP != nil {
+		req.TopP = *p.topP
+	}
+	if p.maxTokens != nil {
+		req.MaxCompletionTokens = int(*p.maxTokens)
+	}
+
+	resp, err := p.client.CreateChatCompletion(context.Background(), req)
 
 	if err != nil {
 		return 0, err
