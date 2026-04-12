@@ -6,6 +6,7 @@ services:
     restart: always
     volumes:
       - ./config.yml:/app/config.yml:ro
+      - ./checkpoints:/app/checkpoints
 
 # SpamAssassin is an optional service
 #  spamassassin:

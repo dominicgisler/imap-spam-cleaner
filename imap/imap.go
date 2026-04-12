@@ -16,8 +16,9 @@ import (
 )
 
 type Imap struct {
-	client *imapclient.Client
-	cfg    app.Inbox
+	client      *imapclient.Client
+	cfg         app.Inbox
+	uidValidity uint32
 }
 
 func New(cfg app.Inbox) (*Imap, error) {
@@ -55,7 +56,36 @@ func New(cfg app.Inbox) (*Imap, error) {
 		logx.Debugf("  - %s", l.Mailbox)
 	}
 
+	mbox, err := i.client.Select(cfg.Inbox, nil).Wait()
+	if err != nil {
+		i.Close()
+		return nil, fmt.Errorf("failed to select inbox: %w", err)
+	}
+	i.uidValidity = mbox.UIDValidity
+	logx.Debugf("Selected inbox %s (UIDValidity=%d, NumMessages=%d)", cfg.Inbox, i.uidValidity, mbox.NumMessages)
+
 	return i, nil
+}
+
+// GetUIDValidity returns the UIDVALIDITY value of the selected mailbox.
+func (i *Imap) GetUIDValidity() uint32 {
+	return i.uidValidity
+}
+
+// GetMaxUID returns the highest UID present in the mailbox, or 0 if empty.
+// It fetches only UIDs (no message bodies) and is used to initialise the
+// checkpoint on the very first run.
+func (i *Imap) GetMaxUID() (imap.UID, error) {
+	uidRes, err := i.client.UIDSearch(&imap.SearchCriteria{}, nil).Wait()
+	if err != nil {
+		return 0, fmt.Errorf("could not search UIDs: %w", err)
+	}
+	uids := uidRes.AllUIDs()
+	if len(uids) == 0 {
+		return 0, nil
+	}
+	// IMAP search results are returned in ascending UID order; the last element is the maximum.
+	return uids[len(uids)-1], nil
 }
 
 func (i *Imap) Close() {
@@ -65,20 +95,13 @@ func (i *Imap) Close() {
 	}
 }
 
-func (i *Imap) LoadMessages() ([]Message, error) {
+func (i *Imap) LoadMessages(sinceUID imap.UID) ([]Message, error) {
 
 	var err error
-	var mbox *imap.SelectData
 	var msgs []*imapclient.FetchMessageBuffer
 	var mr *mail.Reader
 	var p *mail.Part
 	var messages []Message
-
-	mbox, err = i.client.Select(i.cfg.Inbox, nil).Wait()
-	if err != nil {
-		return nil, fmt.Errorf("failed to select INBOX: %w", err)
-	}
-	logx.Debugf("Found %d messages in inbox", mbox.NumMessages)
 
 	searchCrit := &imap.SearchCriteria{}
 	if i.cfg.MinAge > 0 {
@@ -88,23 +111,39 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 		searchCrit.Since = time.Now().Add(-i.cfg.MaxAge)
 	}
 
+	// Add UID range: only messages with UID > sinceUID.
+	startUID := sinceUID + 1
+	if startUID == 0 {
+		// UID overflowed; no new messages possible.
+		return nil, nil
+	}
+	var uidRangeSet imap.UIDSet
+	uidRangeSet.AddRange(startUID, 0) // 0 = * (open-ended)
+	searchCrit.UID = append(searchCrit.UID, uidRangeSet)
+
 	uidRes, err := i.client.UIDSearch(searchCrit, nil).Wait()
 	if err != nil {
 		return nil, fmt.Errorf("could not search UIDs: %w", err)
 	}
 
-	logx.Debugf("Found %d UIDs in timerange", len(uidRes.AllUIDs()))
+	logx.Debugf("Found %d new UIDs since UID %d", len(uidRes.AllUIDs()), sinceUID)
 	if len(uidRes.AllUIDs()) == 0 {
 		return nil, nil
 	}
 
+	// Fetch headers and body text only — attachments are intentionally excluded.
 	fetchOptions := &imap.FetchOptions{
 		Envelope:     true,
 		InternalDate: true,
 		UID:          true,
 		BodySection: []*imap.FetchItemBodySection{
 			{
-				Peek: true,
+				Specifier: imap.PartSpecifierHeader,
+				Peek:      true,
+			},
+			{
+				Specifier: imap.PartSpecifierText,
+				Peek:      true,
 			},
 		},
 	}
@@ -115,11 +154,18 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 	}
 
 	for _, msg := range msgs {
-		var b []byte
+		// Reconstruct a parseable RFC 5322 message from the separate header
+		// and text sections returned by the partial fetch.
+		var headerBytes, textBytes []byte
 		for _, buf := range msg.BodySection {
-			b = buf.Bytes
-			break
+			switch buf.Section.Specifier {
+			case imap.PartSpecifierHeader:
+				headerBytes = buf.Bytes
+			case imap.PartSpecifierText:
+				textBytes = buf.Bytes
+			}
 		}
+		b := append(headerBytes, textBytes...)
 
 		mr, err = mail.CreateReader(bytes.NewReader(b))
 		if err != nil {
@@ -136,7 +182,7 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 			Bcc:         mr.Header.Get("Bcc"),
 			Subject:     msg.Envelope.Subject,
 			Contents:    []string{},
-			Raw:         b, // Raw original message bytes. Useful for traditional spam filters.
+			Raw:         b,
 		}
 
 		if message.Date, err = mr.Header.Date(); err != nil {
