@@ -18,11 +18,11 @@ import (
 // signals tend to be denser in the HTML part.
 const textBodyDivisor = 4
 
-const defaultSystemPrompt = `You are a spam classification assistant. Analyze emails objectively and respond only with a numeric score.`
+const defaultSystemPrompt = `You are a spam classification assistant. Analyze emails objectively and return only a single integer score.`
 
 const defaultUserPrompt = `
 Analyze the following email for its spam potential.
-Return a spam score between 0 and 100. Only answer with the number itself.
+Return a spam score between 0 and 100. Only answer with the number itself, no other text.
 
 Headers:
 {{.Headers}}
@@ -58,11 +58,11 @@ func (p *AIBase) ValidateConfig(config map[string]string) error {
 	}
 	p.model = config["model"]
 
-	n, err := strconv.ParseInt(config["maxsize"], 10, 64)
+	n, err := strconv.Atoi(config["maxsize"])
 	if err != nil || n < 1 {
 		return errors.New("maxsize must be a positive integer")
 	}
-	p.maxsize = int(n)
+	p.maxsize = n
 
 	p.systemPrompt = defaultSystemPrompt
 	if config["system_prompt"] != "" {
