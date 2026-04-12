@@ -15,6 +15,9 @@ type Message struct {
 	Bcc         string
 	Subject     string
 	Contents    []string
+	TextBody    string
+	HtmlBody    string
 	Date        time.Time
 	Raw         []byte
+	Headers     string
 }

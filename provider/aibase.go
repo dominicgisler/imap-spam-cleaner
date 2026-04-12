@@ -33,6 +33,9 @@ func (p *AIBase) ValidateConfig(config map[string]string) error {
 Analyze the following email for its spam potential.
 Return a spam score between 0 and 100. Only answer with the number itself.
 
+Headers:
+{{.Headers}}
+
 From: {{.From}}
 To: {{.To}}
 Delivered-To: {{.DeliveredTo}}
@@ -40,8 +43,11 @@ Cc: {{.Cc}}
 Bcc: {{.Bcc}}
 Subject: {{.Subject}}
 
-Content:
-{{.Content}}
+Text body:
+{{.TextBody}}
+
+HTML body:
+{{.HtmlBody}}
 `
 	if config["prompt"] != "" {
 		prompt = config["prompt"]
@@ -57,15 +63,28 @@ Content:
 
 func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 
-	cont := ""
-	contLen := 0
-	for _, cnt := range msg.Contents {
-		contLen += len(cnt)
-		if contLen > p.maxsize {
-			logx.Debugf("skipping bytes for message #%d (%s)", msg.UID, msg.Subject)
-			break
+	textBody := msg.TextBody
+	htmlBody := msg.HtmlBody
+	if textBody != "" && htmlBody != "" {
+		textLimit := p.maxsize / 2
+		htmlLimit := p.maxsize - textLimit
+		if len(textBody) > textLimit {
+			textBody = textBody[:textLimit]
+			logx.Debugf("truncating text body for message #%d (%s)", msg.UID, msg.Subject)
 		}
-		cont += cnt + "\n"
+		if len(htmlBody) > htmlLimit {
+			htmlBody = htmlBody[:htmlLimit]
+			logx.Debugf("truncating HTML body for message #%d (%s)", msg.UID, msg.Subject)
+		}
+	} else {
+		if len(textBody) > p.maxsize {
+			textBody = textBody[:p.maxsize]
+			logx.Debugf("truncating text body for message #%d (%s)", msg.UID, msg.Subject)
+		}
+		if len(htmlBody) > p.maxsize {
+			htmlBody = htmlBody[:p.maxsize]
+			logx.Debugf("truncating HTML body for message #%d (%s)", msg.UID, msg.Subject)
+		}
 	}
 
 	type TplVars struct {
@@ -75,7 +94,9 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 		Cc          string
 		Bcc         string
 		Subject     string
-		Content     string
+		Headers     string
+		TextBody    string
+		HtmlBody    string
 	}
 
 	var buf bytes.Buffer
@@ -86,7 +107,9 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 		Cc:          msg.Cc,
 		Bcc:         msg.Bcc,
 		Subject:     msg.Subject,
-		Content:     cont,
+		Headers:     msg.Headers,
+		TextBody:    textBody,
+		HtmlBody:    htmlBody,
 	}); err != nil {
 		return "", errors.New("prompt template error: " + err.Error())
 	}

@@ -12,6 +12,9 @@ providers:                        # providers to be used for inboxes
         Analyze the following email for its spam potential.
         Return a spam score between 0 and 100. Only answer with the number itself.
 
+        Headers:
+        {{.Headers}}
+
         From: {{.From}}
         To: {{.To}}
         Delivered-To: {{.DeliveredTo}}
@@ -19,8 +22,11 @@ providers:                        # providers to be used for inboxes
         Bcc: {{.Bcc}}
         Subject: {{.Subject}}
 
-        Content:
-        {{.Content}}
+        Text body:
+        {{.TextBody}}
+
+        HTML body:
+        {{.HtmlBody}}
   prov2:                          # provider name
     type: ollama                  # provider type
     config:                       # provider specific configuration

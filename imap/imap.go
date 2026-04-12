@@ -1,10 +1,13 @@
 package imap
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
 	"io"
+	"mime"
+	"strings"
 	"time"
 
 	"github.com/dominicgisler/imap-spam-cleaner/app"
@@ -182,7 +185,10 @@ func (i *Imap) LoadMessages(sinceUID imap.UID) ([]Message, error) {
 			Bcc:         mr.Header.Get("Bcc"),
 			Subject:     msg.Envelope.Subject,
 			Contents:    []string{},
-			Raw:         b,
+			TextBody:    "",
+			HtmlBody:    "",
+			Raw:         b, // Raw original message bytes. Useful for traditional spam filters.
+			Headers:     extractRelevantHeaders(b),
 		}
 
 		if message.Date, err = mr.Header.Date(); err != nil {
@@ -214,6 +220,20 @@ func (i *Imap) LoadMessages(sinceUID imap.UID) ([]Message, error) {
 					break
 				}
 				message.Contents = append(message.Contents, string(b))
+
+				mediaType := "text/plain"
+				if ctype := p.Header.Get("Content-Type"); ctype != "" {
+					if mt, _, err := mime.ParseMediaType(ctype); err == nil {
+						mediaType = strings.ToLower(mt)
+					}
+				}
+
+				switch mediaType {
+				case "text/html":
+					message.HtmlBody += string(b) + "\n"
+				default:
+					message.TextBody += string(b) + "\n"
+				}
 			}
 		}
 
@@ -221,6 +241,62 @@ func (i *Imap) LoadMessages(sinceUID imap.UID) ([]Message, error) {
 	}
 
 	return messages, nil
+}
+
+func extractRelevantHeaders(raw []byte) string {
+	end := bytes.Index(raw, []byte("\r\n\r\n"))
+	if end < 0 {
+		end = bytes.Index(raw, []byte("\n\n"))
+	}
+	if end < 0 {
+		end = len(raw)
+	}
+
+	headers := raw[:end]
+	relevant := []string{
+		"Authentication-Results",
+		"DKIM-Signature",
+		"ARC-Authentication-Results",
+		"Received",
+		"Return-Path",
+		"Message-ID",
+		"Reply-To",
+		"Sender",
+	}
+
+	var out []string
+	scanner := bufio.NewScanner(bytes.NewReader(headers))
+	current := ""
+	include := false
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			break
+		}
+		if strings.HasPrefix(line, " ") || strings.HasPrefix(line, "\t") {
+			if include {
+				current += "\n" + line
+			}
+			continue
+		}
+		if include && current != "" {
+			out = append(out, current)
+		}
+		include = false
+		current = ""
+		for _, name := range relevant {
+			if strings.HasPrefix(strings.ToLower(line), strings.ToLower(name)+":") {
+				include = true
+				current = line
+				break
+			}
+		}
+	}
+	if include && current != "" {
+		out = append(out, current)
+	}
+
+	return strings.Join(out, "\n")
 }
 
 func (i *Imap) MoveMessage(uid imap.UID, mailbox string) error {
