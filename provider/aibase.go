@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"strconv"
+	"strings"
 	"text/template"
 
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
+	"github.com/dominicgisler/imap-spam-cleaner/mailclean"
 )
 
 type AIBase struct {
@@ -46,7 +48,7 @@ Subject: {{.Subject}}
 Text body:
 {{.TextBody}}
 
-HTML body:
+HTML body (converted to Markdown):
 {{.HtmlBody}}
 `
 	if config["prompt"] != "" {
@@ -65,8 +67,23 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 
 	textBody := msg.TextBody
 	htmlBody := msg.HtmlBody
+
+	// Convert HTML body to simplified Markdown to reduce noise and token count.
+	// Falls back to the raw HTML if conversion fails.
+	if htmlBody != "" {
+		md, err := mailclean.HTMLToSimpleMarkdown(strings.NewReader(htmlBody))
+		if err != nil {
+			logx.Debugf("HTML to Markdown conversion failed for message #%d (%s), using raw HTML: %v", msg.UID, msg.Subject, err)
+		} else {
+			htmlBody = md
+		}
+	}
+
+	// Apply size limits. When both bodies are present, allocate 1/4 of the
+	// budget to plain-text and 3/4 to the HTML-derived Markdown — spam
+	// signals tend to be denser in the HTML part.
 	if textBody != "" && htmlBody != "" {
-		textLimit := p.maxsize / 2
+		textLimit := p.maxsize / 4
 		htmlLimit := p.maxsize - textLimit
 		if len(textBody) > textLimit {
 			textBody = textBody[:textLimit]
