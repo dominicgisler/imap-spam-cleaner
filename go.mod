@@ -10,6 +10,7 @@ require (
 	github.com/ollama/ollama v0.19.0
 	github.com/sashabaranov/go-openai v1.41.2
 	github.com/sirupsen/logrus v1.9.4
+	golang.org/x/net v0.52.0
 	google.golang.org/genai v1.52.1
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -45,7 +46,6 @@ require (
 	go.opentelemetry.io/otel/metric v1.42.0 // indirect
 	go.opentelemetry.io/otel/trace v1.42.0 // indirect
 	golang.org/x/crypto v0.49.0 // indirect
-	golang.org/x/net v0.52.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
 	google.golang.org/api v0.273.1 // indirect
