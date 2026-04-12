@@ -12,6 +12,12 @@ import (
 	"github.com/dominicgisler/imap-spam-cleaner/mailclean"
 )
 
+// textBodyFraction is the share of the LLM prompt budget allocated to the
+// plain-text part of an email when both text and HTML bodies are present.
+// The remaining (1 - 1/textBodyFraction) is given to the HTML-derived
+// Markdown, reflecting that spam signals tend to be denser in the HTML part.
+const textBodyFraction = 4
+
 type AIBase struct {
 	model   string
 	maxsize int
@@ -83,7 +89,7 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 	// budget to plain-text and 3/4 to the HTML-derived Markdown — spam
 	// signals tend to be denser in the HTML part.
 	if textBody != "" && htmlBody != "" {
-		textLimit := p.maxsize / 4
+		textLimit := p.maxsize / textBodyFraction
 		htmlLimit := p.maxsize - textLimit
 		if len(textBody) > textLimit {
 			textBody = textBody[:textLimit]

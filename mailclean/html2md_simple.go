@@ -140,20 +140,42 @@ func HTMLToSimpleMarkdown(r io.Reader) (string, error) {
 	// For unambiguous block-level markers (e.g. "-----Original Message-----")
 	// we strip regardless of position. For generic inline patterns like "On "
 	// or "From:" we require them to be at the start of a new line and past a
-	// minimum offset, to avoid false positives inside regular body text.
+	// minimum offset, and additionally verify the line matches the expected
+	// quoted-reply format to avoid false positives inside regular body text.
 	type sepRule struct {
 		sep       string
 		minOffset int
+		// verify receives the lowercased full string and the match index; it
+		// returns true when the match really is a quoted-reply marker.
+		verify func(s string, idx int) bool
 	}
+	always := func(_ string, _ int) bool { return true }
 	rules := []sepRule{
-		{"-----original message-----", 0},
-		{"----- forwarded message -----", 0},
-		{"\non ", 100},
-		{"\nfrom:", 100},
+		{"-----original message-----", 0, always},
+		{"----- forwarded message -----", 0, always},
+		// Gmail/Thunderbird style: "On <date>, <name> wrote:" at start of a line.
+		// Only strip when the matched line ends with "wrote:" so that innocent
+		// phrases like "On the topic of..." or "On Monday we decided..." are
+		// left untouched.
+		{"\non ", 100, func(s string, idx int) bool {
+			lineStart := idx + 1 // skip the leading '\n'
+			lineEnd := strings.Index(s[lineStart:], "\n")
+			var line string
+			if lineEnd < 0 {
+				line = s[lineStart:]
+			} else {
+				line = s[lineStart : lineStart+lineEnd]
+			}
+			return strings.HasSuffix(strings.TrimSpace(line), "wrote:")
+		}},
+		// "From:" header block at start of a line (forwarded-message header).
+		// Require a minimum offset so that a legitimate opening like "From: our
+		// team" near the top is not accidentally trimmed.
+		{"\nfrom:", 100, always},
 	}
 	lower := strings.ToLower(out)
 	for _, rule := range rules {
-		if idx := strings.Index(lower, rule.sep); idx >= rule.minOffset {
+		if idx := strings.Index(lower, rule.sep); idx >= rule.minOffset && rule.verify(lower, idx) {
 			out = strings.TrimSpace(out[:idx])
 			break
 		}
