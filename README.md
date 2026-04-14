@@ -47,7 +47,7 @@ INFO   [2026-02-28T16:55:32Z] Moved 4 messages
 
 ## Contributors
 
-Feel free to contribute to this project by opening issues for useful features, reporting bugs or implementing requested features.
+Feel free to contribute to this project, check the [Contribution Guidelines](CONTRIBUTING.md) for more information.
 
 <!-- readme: contributors -start -->
 <table>
