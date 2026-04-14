@@ -179,8 +179,6 @@ Documentation improvements are always welcome.
 
 The documentation is automatically built and deployed to [GitHub Pages](https://dominicgisler.github.io/imap-spam-cleaner) when changes are merged into the master branch.
 
-Documentation improvements are always welcome.
-
 ---
 
 # Testing
