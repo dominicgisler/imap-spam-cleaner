@@ -17,7 +17,6 @@ Contributions of all kinds are welcome - from fixing bugs and adding features to
 * [Documentation](#documentation)
 * [Testing](#testing)
 * [Release Workflow](#release-workflow)
-* [Security Issues](#security-issues)
 * [Code of Conduct](#code-of-conduct)
 * [Final Notes](#final-notes)
 
@@ -204,18 +203,6 @@ When a release is created:
 * Docker image builds are triggered automatically
 
 Contributors do not need to manage releases.
-
----
-
-# Security Issues
-
-If you discover a security vulnerability:
-
-* Do not open a public issue for sensitive vulnerabilities
-* Contact the maintainer privately
-* Provide as much detail as possible
-
-For non-sensitive issues, normal GitHub issues are acceptable.
 
 ---
 
