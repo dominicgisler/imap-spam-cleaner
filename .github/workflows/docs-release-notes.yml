@@ -1,0 +1,65 @@
+name: Add release notes to docs
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  update-mkdocs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract release data
+        id: release
+        run: |
+          echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+
+          cat << 'EOF' > release_notes.md
+          ${{ github.event.release.body }}
+          EOF
+
+      - name: Prepare markdown block
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+
+          cat << EOF > new_entry.md
+          ## ${TAG} — ${DATE}
+
+          $(cat release_notes.md)
+
+          ---
+          EOF
+
+      - name: Insert into MkDocs page
+        run: |
+          TARGET_FILE="docs/changelog.md"
+          MARKER="<!-- RELEASES:START -->"
+
+          awk -v marker="$MARKER" '
+          {
+              print
+              if ($0 ~ marker) {
+                  system("cat new_entry.md")
+              }
+          }' "$TARGET_FILE" > tmp.md
+
+          mv tmp.md "$TARGET_FILE"
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add docs/changelog.md
+
+          git commit -m "docs: add release notes for ${TAG}" || echo "No changes"
+
+          git push
