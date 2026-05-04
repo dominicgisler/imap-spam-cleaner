@@ -136,15 +136,8 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 			Bcc:         mr.Header.Get("Bcc"),
 			Subject:     msg.Envelope.Subject,
 			Contents:    []string{},
+			Date:        msg.InternalDate,
 			Raw:         b, // Raw original message bytes. Useful for traditional spam filters.
-		}
-
-		if message.Date, err = mr.Header.Date(); err != nil {
-			logx.Debugf("failed to parse Date header, falling back to INTERNALDATE (msg.UID=%d): %v", msg.UID, err)
-			message.Date = msg.InternalDate
-		} else if message.Date.IsZero() {
-			logx.Debugf("message has no Date header, falling back to INTERNALDATE (msg.UID=%d)", msg.UID)
-			message.Date = msg.InternalDate
 		}
 
 		if i.cfg.MinAge > 0 && message.Date.After(time.Now().Add(-i.cfg.MinAge)) || i.cfg.MaxAge > 0 && message.Date.Before(time.Now().Add(-i.cfg.MaxAge)) {
