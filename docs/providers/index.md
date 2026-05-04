@@ -23,3 +23,13 @@ Subject: {{.Subject}}
 Content:
 {{.Content}}
 ```
+
+The following placeholders can be used in the prompt:
+
+- `{{.From}}`: message header `From`
+- `{{.To}}`: message header `To`
+- `{{.DeliveredTo}}`: message header `Delivered-To`
+- `{{.Cc}}`: message header `Cc`
+- `{{.Bcc}}`: message header `Bcc`
+- `{{.Subject}}`: message subject
+- `{{.Content}}`: message content

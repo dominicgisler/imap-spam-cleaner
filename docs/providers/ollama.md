@@ -9,7 +9,7 @@ Configuration options:
 | `url`     | string  | yes      | Ollama server URL                                | `http://127.0.0.1:11434` |
 | `model`   | string  | yes      | Ollama model name used for classification        | `gpt-oss:20b`            |
 | `maxsize` | integer | yes      | Maximum email size sent to the model (bytes)     | `100000`                 |
-| `prompt`  | string  | no       | The prompt which is sent to the model (optional) | _see above_              |
+| `prompt`  | string  | no       | The prompt which is sent to the model (optional) | _see below_              |
 
 Example:
 
