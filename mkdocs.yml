@@ -34,7 +34,6 @@ theme:
 
 nav:
   - Getting started: getting-started.md
-  - Changelog: changelog.md
   - Configuration:
     - Overview: configuration/index.md
     - Logging: configuration/logging.md

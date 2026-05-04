@@ -9,7 +9,7 @@ Configuration options:
 | `apikey`  | string  | yes      | OpenAI API key                                   | `some-api-key` |
 | `model`   | string  | yes      | OpenAI model used for classification             | `gpt-5-mini`   |
 | `maxsize` | integer | yes      | Maximum email size sent to the model (bytes)     | `100000`       |
-| `prompt`  | string  | no       | The prompt which is sent to the model (optional) | _see above_    |
+| `prompt`  | string  | no       | The prompt which is sent to the model (optional) | _see below_    |
 
 Example:
 
