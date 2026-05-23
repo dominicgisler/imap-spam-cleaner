@@ -9,4 +9,5 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 go build -a -installsuffix c
 FROM alpine:latest
 WORKDIR /app
 COPY --from=build /app/dist/ .
+EXPOSE 8080
 ENTRYPOINT [ "/app/imap-spam-cleaner" ]

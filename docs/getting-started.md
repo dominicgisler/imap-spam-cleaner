@@ -75,6 +75,8 @@ services:
     container_name: imap-spam-cleaner
     hostname: imap-spam-cleaner
     restart: always
+    ports:
+      - "8080:8080"
     volumes:
       - ./config.yml:/app/config.yml:ro
       - ./store.db:/app/store.db:rw
