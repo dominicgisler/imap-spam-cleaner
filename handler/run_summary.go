@@ -7,11 +7,6 @@ import (
 	"github.com/dominicgisler/imap-spam-cleaner/database"
 )
 
-type runSummaryResponse struct {
-	Inbox     string                `json:"inbox,omitempty"`
-	Summaries []database.RunSummary `json:"summaries"`
-}
-
 func RunSummary(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -29,10 +24,7 @@ func RunSummary(w http.ResponseWriter, r *http.Request) {
 	if inbox != "" && len(summaries) > 0 {
 		res, err = json.Marshal(summaries[0])
 	} else {
-		res, err = json.Marshal(runSummaryResponse{
-			Inbox:     inbox,
-			Summaries: summaries,
-		})
+		res, err = json.Marshal(summaries)
 	}
 
 	if err != nil {
