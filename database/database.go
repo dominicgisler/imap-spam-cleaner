@@ -6,12 +6,12 @@ import (
 
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 var db *sqlx.DB
 
-const driverName = "sqlite3"
+const driverName = "sqlite"
 
 //go:embed queries/*
 var fs embed.FS
