@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/dominicgisler/imap-spam-cleaner/app"
+	"github.com/dominicgisler/imap-spam-cleaner/database"
 	"github.com/dominicgisler/imap-spam-cleaner/inbox"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/dominicgisler/imap-spam-cleaner/provider"
@@ -34,6 +35,10 @@ func main() {
 	if err != nil {
 		logx.Errorf("Could not load config: %v", err)
 		return
+	}
+
+	if err = database.Init("store.db"); err != nil {
+		logx.Errorf("Could not init database: %v", err)
 	}
 
 	ctx := app.Context{
