@@ -46,4 +46,5 @@ nav:
       - Ollama: providers/ollama.md
       - Gemini: providers/gemini.md
       - SpamAssassin: providers/spamassassin.md
+  - HTTP API: http-api.md
   - Contributing: contributing.md

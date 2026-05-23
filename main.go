@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"github.com/dominicgisler/imap-spam-cleaner/app"
+	"github.com/dominicgisler/imap-spam-cleaner/database"
+	"github.com/dominicgisler/imap-spam-cleaner/handler"
 	"github.com/dominicgisler/imap-spam-cleaner/inbox"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/dominicgisler/imap-spam-cleaner/provider"
@@ -36,6 +38,10 @@ func main() {
 		return
 	}
 
+	if err = database.Init("store.db"); err != nil {
+		logx.Errorf("Could not init database: %v", err)
+	}
+
 	ctx := app.Context{
 		Config:  c,
 		Options: options,
@@ -59,6 +65,12 @@ func main() {
 		inbox.RunAllInboxes(ctx)
 		return
 	}
+
+	go func() {
+		if err = handler.ListenAndServe(); err != nil {
+			logx.Errorf("Error starting handler: %v", err)
+		}
+	}()
 
 	inbox.Schedule(ctx)
 }

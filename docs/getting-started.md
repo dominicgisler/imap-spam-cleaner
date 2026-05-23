@@ -1,9 +1,10 @@
 # Getting started
 
 - Create `config.yml` matching your inboxes (example below)
+- Prepare empty database file `store.db` to store metrics (if needed)
 - Create `docker-compose.yml` if using docker compose (example below)
 - Start the container with: `docker compose up -d`
-- Or with: `docker run -d --name imap-spam-cleaner -v ./config.yml:/app/config.yml dominicgisler/imap-spam-cleaner`
+- Or with: `docker run -d --name imap-spam-cleaner -v ./config.yml:/app/config.yml -v ./store.db:/app/store.db dominicgisler/imap-spam-cleaner`
 
 The container will run in the background and execute analysis steps according to the defined schedule. If needed check logs either with `docker compose logs -f` or `docker logs -f imap-spam-cleaner`.
 
@@ -76,4 +77,5 @@ services:
     restart: always
     volumes:
       - ./config.yml:/app/config.yml:ro
+      - ./store.db:/app/store.db:rw
 ```

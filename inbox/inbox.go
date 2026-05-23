@@ -4,8 +4,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/dominicgisler/imap-spam-cleaner/app"
+	"github.com/dominicgisler/imap-spam-cleaner/database"
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/dominicgisler/imap-spam-cleaner/provider"
@@ -66,8 +68,11 @@ func processInbox(ctx app.Context, inbox app.Inbox, prov app.Provider) {
 	var p provider.Provider
 	var im *imap.Imap
 	var n int
+	var run database.Run
 
 	logx.Infof("Handling %s", inbox.Username)
+	run.StartedAt = time.Now()
+	run.Inbox = inbox.Username
 
 	if im, err = imap.New(inbox); err != nil {
 		logx.Errorf("Could not load imap: %v\n", err)
@@ -80,6 +85,7 @@ func processInbox(ctx app.Context, inbox app.Inbox, prov app.Provider) {
 		return
 	}
 	logx.Infof("Loaded %d messages", len(msgs))
+	run.MessageCount = len(msgs)
 
 	p, err = provider.New(prov.Type)
 	if err != nil {
@@ -106,12 +112,14 @@ func processInbox(ctx app.Context, inbox app.Inbox, prov app.Provider) {
 			}
 			if trustedSender {
 				logx.Debugf("Skipping message #%d (%s) because of trusted sender (%s)", m.UID, m.Subject, m.From)
+				run.SkippedCount++
 				continue
 			}
 		}
 
 		if n, err = p.Analyze(m); err != nil {
 			logx.Errorf("Could not analyze message (%s): %v\n", m.Subject, err)
+			run.FailedCount++
 			continue
 		}
 		logx.Debugf("Spam score of message #%d (%s): %d/100", m.UID, m.Subject, n)
@@ -130,6 +138,14 @@ func processInbox(ctx app.Context, inbox app.Inbox, prov app.Provider) {
 		}
 	}
 	logx.Infof("Moved %d messages", moved)
+	run.MovedCount = moved
 
 	im.Close()
+
+	if !ctx.Options.AnalyzeOnly {
+		run.FinishedAt = time.Now()
+		if err = database.AddRun(&run); err != nil {
+			logx.Errorf("Could not save run: %v\n", err)
+		}
+	}
 }
