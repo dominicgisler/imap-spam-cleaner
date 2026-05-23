@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 
+	"github.com/dominicgisler/imap-spam-cleaner/logx"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -37,4 +38,12 @@ func Init(path string) (err error) {
 	}
 
 	return nil
+}
+
+func query(file string) string {
+	bs, err := fs.ReadFile("queries/" + file + ".sql")
+	if err != nil {
+		logx.Panic(err.Error())
+	}
+	return string(bs)
 }
