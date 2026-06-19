@@ -26,18 +26,19 @@ func (p *SpamAssassin) Name() string {
 }
 
 func (p *SpamAssassin) ValidateConfig(config map[string]string) error {
-	// host and port optional; set defaults
+
 	host := config["host"]
 	if host == "" {
 		host = "127.0.0.1"
 	}
+
 	port := config["port"]
 	if port == "" {
 		port = "783"
 	}
+
 	p.addr = net.JoinHostPort(host, port)
 
-	// timeout optional (seconds)
 	if config["timeout"] == "" {
 		p.timeout = 5 * time.Second
 	} else if to, err := time.ParseDuration(config["timeout"]); err == nil && to > 0 {
@@ -50,12 +51,13 @@ func (p *SpamAssassin) ValidateConfig(config map[string]string) error {
 		p.timeout = time.Duration(t * float64(time.Second))
 	}
 
-	// maxsize required (positive integer)
-	n, err := strconv.ParseInt(config["maxsize"], 10, 64)
-	if err != nil || n < 1 {
-		return errors.New("spamassassin maxsize must be a positive integer")
+	if config["maxsize"] != "" {
+		n, err := strconv.ParseInt(config["maxsize"], 10, 64)
+		if err != nil || n < 0 {
+			return errors.New("spamassassin maxsize must be >= 0")
+		}
+		p.maxsize = int(n)
 	}
-	p.maxsize = int(n)
 
 	return nil
 }
@@ -71,7 +73,7 @@ func (p *SpamAssassin) Init(config map[string]string) error {
 func (p *SpamAssassin) Analyze(msg imap.Message) (int, error) {
 	// Prefer sending the original raw message if available.
 	var rawBytes []byte
-	if len(msg.Raw) > p.maxsize {
+	if p.maxsize > 0 && len(msg.Raw) > p.maxsize {
 		logx.Debugf("spamassassin: truncating raw message for message #%d (%s)", msg.UID, msg.Subject)
 		rawBytes = msg.Raw[:p.maxsize]
 		rawBytes = append(rawBytes, '\n')
