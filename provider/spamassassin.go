@@ -53,8 +53,8 @@ func (p *SpamAssassin) ValidateConfig(config map[string]string) error {
 
 	if config["maxsize"] != "" {
 		n, err := strconv.ParseInt(config["maxsize"], 10, 64)
-		if err != nil || n < 0 {
-			return errors.New("spamassassin maxsize must be >= 0")
+		if err != nil || n < 1 {
+			return errors.New("spamassassin maxsize must be a positive integer")
 		}
 		p.maxsize = int(n)
 	}
