@@ -5,9 +5,9 @@ providers:                        # providers to be used for inboxes
   prov1:                          # provider name
     type: openai                  # provider type
     config:                       # provider specific configuration
-      apikey: some-api-key        # apikey
-      model: gpt-4o-mini          # gpt model to use
-      maxsize: 100000             # message size limit for prompt (bytes)
+      apikey: some-api-key        # openai apikey
+      model: gpt-4o-mini          # openai model to use
+      maxsize: 100000             # optional message size limit for prompt (bytes)
       prompt: |                   # prompt to be sent to the model
         Analyze the following email for its spam potential.
         Return a spam score between 0 and 100. Only answer with the number itself.
@@ -24,22 +24,22 @@ providers:                        # providers to be used for inboxes
   prov2:                          # provider name
     type: ollama                  # provider type
     config:                       # provider specific configuration
-      url: http://127.0.0.1:11434 # url
-      model: gpt-oss:20b          # model to use
-      maxsize: 100000             # message size limit for prompt (bytes)
+      url: http://127.0.0.1:11434 # ollama url
+      model: gpt-oss:20b          # ollama model to use
+      maxsize: 100000             # optional message size limit for prompt (bytes)
   prov3:                          # provider name
     type: spamassassin            # provider type
     config:                       # provider specific configuration
       host: 127.0.0.1             # spamassassin host
       port: 783                   # spamassassin port
-      maxsize: 300000             # message size limit
+      maxsize: 1000000            # optional message size limit
       timeout: 10s                # connection timeout
   prov4:                          # provider name
     type: gemini                  # provider type
     config:                       # provider specific configuration
-      apikey: some-api-key        # apikey
-      model: gemini-2.5-flash     # model to use
-      maxsize: 100000             # message size limit for prompt (bytes)
+      apikey: some-api-key        # gemini apikey
+      model: gemini-2.5-flash     # gemini model to use
+      maxsize: 100000             # optional message size limit for prompt (bytes)
 
 whitelists:                       # trusted senders as regexp, not to be analyzed
   whitelist1:                     # example with exact addresses
