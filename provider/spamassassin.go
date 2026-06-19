@@ -74,6 +74,7 @@ func (p *SpamAssassin) Analyze(msg imap.Message) (int, error) {
 	if len(msg.Raw) > p.maxsize {
 		logx.Debugf("spamassassin: truncating raw message for message #%d (%s)", msg.UID, msg.Subject)
 		rawBytes = msg.Raw[:p.maxsize]
+		rawBytes = append(rawBytes, '\n')
 	} else {
 		rawBytes = msg.Raw
 	}
