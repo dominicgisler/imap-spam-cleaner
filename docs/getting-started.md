@@ -22,7 +22,7 @@ providers:                        # providers to be used for inboxes
     config:                       # provider specific configuration
       apikey: some-api-key        # openai apikey
       model: gpt-4o-mini          # openai model to use
-      maxsize: 100000             # message size limit for prompt (bytes)
+      maxsize: 100000             # optional message size limit for prompt (bytes)
       prompt: |                   # prompt to be sent to the model
         Analyze the following email for its spam potential.
         Return a spam score between 0 and 100. Only answer with the number itself.
@@ -41,13 +41,28 @@ providers:                        # providers to be used for inboxes
     config:                       # provider specific configuration
       url: http://127.0.0.1:11434 # ollama url
       model: gpt-oss:20b          # ollama model to use
-      maxsize: 100000             # message size limit for prompt (bytes)
+      maxsize: 100000             # optional message size limit for prompt (bytes)
   prov3:                          # provider name
     type: spamassassin            # provider type
     config:                       # provider specific configuration
       host: 127.0.0.1             # spamassassin host
       port: 783                   # spamassassin port
-      maxsize: 300000             # message size limit
+      maxsize: 1000000            # optional message size limit
+      timeout: 10s                # connection timeout
+  prov4:                          # provider name
+    type: gemini                  # provider type
+    config:                       # provider specific configuration
+      apikey: some-api-key        # gemini apikey
+      model: gemini-2.5-flash     # gemini model to use
+      maxsize: 100000             # optional message size limit for prompt (bytes)
+
+whitelists:                       # trusted senders as regexp, not to be analyzed
+  whitelist1:                     # example with exact addresses
+    - ^.* <info@example.com>$     # matches <info@example.com>
+    - ^.* <contact@domain.com>$   # matches <contact@domain.com>
+  whitelist2:                     # example with only domain match
+    - ^.* <.*@example.com>$       # matches for all @example.com addresses
+    - ^.* <.*@domain.com>$        # matches for all @domain.com addresses
 
 inboxes:                          # inboxes to be checked
   - schedule: "* * * * *"         # schedule in cron format (when to execute spam analysis)
@@ -62,6 +77,8 @@ inboxes:                          # inboxes to be checked
     minscore: 75                  # min score to detect spam (0-100)
     minage: 0h                    # min age of message
     maxage: 24h                   # max age of message
+    whitelist: whitelist1         # whitelist to use, empty/missing = no whitelist
+
 ```
 
 ## Docker compose

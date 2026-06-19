@@ -18,16 +18,20 @@ type AIBase struct {
 
 func (p *AIBase) ValidateConfig(config map[string]string) error {
 
+	var err error
+
 	if config["model"] == "" {
 		return errors.New("ai model is required")
 	}
 	p.model = config["model"]
 
-	n, err := strconv.ParseInt(config["maxsize"], 10, 64)
-	if err != nil || n < 1 {
-		return errors.New("maxsize must be a positive integer")
+	if config["maxsize"] != "" {
+		n, err := strconv.ParseInt(config["maxsize"], 10, 64)
+		if err != nil || n < 1 {
+			return errors.New("maxsize must be a positive integer")
+		}
+		p.maxsize = int(n)
 	}
-	p.maxsize = int(n)
 
 	prompt := `
 Analyze the following email for its spam potential.
@@ -61,7 +65,7 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 	contLen := 0
 	for _, cnt := range msg.Contents {
 		contLen += len(cnt)
-		if contLen > p.maxsize {
+		if p.maxsize > 0 && contLen > p.maxsize {
 			logx.Debugf("skipping bytes for message #%d (%s)", msg.UID, msg.Subject)
 			break
 		}
