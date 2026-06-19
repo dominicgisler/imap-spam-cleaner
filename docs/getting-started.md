@@ -1,7 +1,7 @@
 # Getting started
 
 - Create `config.yml` matching your inboxes (example below)
-- Prepare empty database file `store.db` to store metrics (if needed)
+- Prepare empty file `store.db` to store metrics (optional)
 - Create `docker-compose.yml` if using docker compose (example below)
 - Start the container with: `docker compose up -d`
 - Or with: `docker run -d --name imap-spam-cleaner -v ./config.yml:/app/config.yml -v ./store.db:/app/store.db dominicgisler/imap-spam-cleaner`
@@ -95,6 +95,6 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./config.yml:/app/config.yml:ro
-      - ./store.db:/app/store.db:rw
+      - ./config.yml:/app/config.yml:ro # required
+      - ./store.db:/app/store.db:rw     # optional
 ```
