@@ -39,9 +39,13 @@ func AddRun(run *Run) error {
 	return nil
 }
 
-func ListRunSummaries(inbox string) ([]RunSummary, error) {
+func ListRunSummaries(inbox string, maxAge int) ([]RunSummary, error) {
+	var minDate *time.Time
+	if maxAge > 0 {
+		minDate = new(time.Now().Add(-time.Second * time.Duration(maxAge)))
+	}
 	var summaries []RunSummary
-	if err := db.Select(&summaries, query("run/summary"), inbox, inbox); err != nil {
+	if err := db.Select(&summaries, query("run/summary"), inbox, inbox, minDate, minDate); err != nil {
 		return nil, err
 	}
 	return summaries, nil

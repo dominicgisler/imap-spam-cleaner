@@ -14,9 +14,10 @@ Returns one summary entry per inbox. Each entry contains the first recorded run,
 
 ### Query parameters
 
-| Name    | Required | Description                         |
-|---------|----------|-------------------------------------|
-| `inbox` | no       | Limits the summary to one inbox.    |
+| Name     | Required | Description                                                |
+|----------|----------|------------------------------------------------------------|
+| `inbox`  | no       | Limits the summary to one inbox.                           |
+| `maxage` | no       | Number of seconds, limits the runs to use for the summary. |
 
 ### Example request unfiltered
 
@@ -66,6 +67,37 @@ curl "http://localhost:8080/runs/summary?inbox=info@example.com"
   "failed_count": 2,
   "moved_count": 37
 }
+```
+
+### Example request to only show stats for the last day
+
+```console
+curl "http://localhost:8080/runs/summary?maxage=86400"
+```
+
+```json
+[
+  {
+    "inbox": "test@example.com",
+    "run_count": 10,
+    "first_run_at": "2026-05-23 08:00:00+00:00",
+    "last_run_at": "2026-05-23 11:55:00+00:00",
+    "message_count": 100,
+    "skipped_count": 10,
+    "failed_count": 2,
+    "moved_count": 88
+  },
+  {
+    "inbox": "info@example.com",
+    "run_count": 20,
+    "first_run_at": "2026-05-23 08:00:00+00:00",
+    "last_run_at": "2026-05-23 11:55:00+00:00",
+    "message_count": 200,
+    "skipped_count": 20,
+    "failed_count": 4,
+    "moved_count": 176
+  }
+]
 ```
 
 When `inbox` is omitted, an array of summaries will be returned.
