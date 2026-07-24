@@ -4,6 +4,9 @@
 default: --tag
 	@docker build --platform linux/amd64,linux/arm64 -f Dockerfile -t dominicgisler/imap-spam-cleaner:$(TAG) .
 
+fix:
+	@go fix ./...
+
 lint:
 	@golangci-lint run
 

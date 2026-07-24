@@ -12,11 +12,11 @@ const (
 
 type gooseLogger struct{}
 
-func (*gooseLogger) Fatalf(format string, v ...interface{}) {
+func (*gooseLogger) Fatalf(format string, v ...any) {
 	logx.Panicf(format, v...)
 }
 
-func (*gooseLogger) Printf(format string, v ...interface{}) {
+func (*gooseLogger) Printf(format string, v ...any) {
 	logx.Infof(format, v...)
 }
 
