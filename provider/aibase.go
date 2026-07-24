@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"strconv"
+	"strings"
 	"text/template"
 
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
@@ -61,7 +62,7 @@ Content:
 
 func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 
-	cont := ""
+	var cont strings.Builder
 	contLen := 0
 	for _, cnt := range msg.Contents {
 		contLen += len(cnt)
@@ -69,7 +70,7 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 			logx.Debugf("skipping bytes for message #%d (%s)", msg.UID, msg.Subject)
 			break
 		}
-		cont += cnt + "\n"
+		cont.WriteString(cnt + "\n")
 	}
 
 	type TplVars struct {
@@ -90,7 +91,7 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 		Cc:          msg.Cc,
 		Bcc:         msg.Bcc,
 		Subject:     msg.Subject,
-		Content:     cont,
+		Content:     cont.String(),
 	}); err != nil {
 		return "", errors.New("prompt template error: " + err.Error())
 	}
