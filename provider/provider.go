@@ -14,7 +14,7 @@ type Provider interface {
 }
 
 func New(t string) (Provider, error) {
-	providers := []Provider{&OpenAI{}, &Ollama{}, &SpamAssassin{}, &Gemini{}}
+	providers := []Provider{&OpenAI{}, &Ollama{}, &SpamAssassin{}, &Gemini{}, &Rspamd{}}
 	for _, provider := range providers {
 		if provider.Name() == t {
 			return provider, nil
