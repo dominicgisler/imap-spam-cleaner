@@ -127,6 +127,17 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 			continue
 		}
 
+		var rawHeader []byte
+		headers := mr.Header.Fields()
+		for headers.Next() {
+			headerBytes, err := headers.Raw()
+			if err != nil {
+				logx.Warnf("failed to read message fields: %v\n", err)
+				continue
+			}
+			rawHeader = append(rawHeader, headerBytes...)
+		}
+
 		message := Message{
 			UID:         msg.UID,
 			DeliveredTo: mr.Header.Get("Delivered-To"),
@@ -137,7 +148,8 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 			Subject:     msg.Envelope.Subject,
 			Contents:    []string{},
 			Date:        msg.InternalDate,
-			Raw:         b, // Raw original message bytes. Useful for traditional spam filters.
+			Raw:         b,
+			RawHeader:   rawHeader,
 		}
 
 		if i.cfg.MinAge > 0 && message.Date.After(time.Now().Add(-i.cfg.MinAge)) || i.cfg.MaxAge > 0 && message.Date.Before(time.Now().Add(-i.cfg.MaxAge)) {

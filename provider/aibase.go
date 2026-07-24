@@ -38,12 +38,7 @@ func (p *AIBase) ValidateConfig(config map[string]string) error {
 Analyze the following email for its spam potential.
 Return a spam score between 0 and 100. Only answer with the number itself.
 
-From: {{.From}}
-To: {{.To}}
-Delivered-To: {{.DeliveredTo}}
-Cc: {{.Cc}}
-Bcc: {{.Bcc}}
-Subject: {{.Subject}}
+{{.RawHeader}}
 
 Content:
 {{.Content}}
@@ -81,6 +76,8 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 		Bcc         string
 		Subject     string
 		Content     string
+		Raw         string
+		RawHeader   string
 	}
 
 	var buf bytes.Buffer
@@ -92,6 +89,8 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 		Bcc:         msg.Bcc,
 		Subject:     msg.Subject,
 		Content:     cont.String(),
+		Raw:         string(msg.Raw),
+		RawHeader:   string(msg.RawHeader),
 	}); err != nil {
 		return "", errors.New("prompt template error: " + err.Error())
 	}

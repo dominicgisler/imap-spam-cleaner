@@ -4,12 +4,12 @@ Uses a local LLM to analyze the message.
 
 Configuration options:
 
-| Field     | Type    | Required | Description                                      | Example                  |
-|-----------|---------|----------|--------------------------------------------------|--------------------------|
-| `url`     | string  | yes      | Ollama server URL                                | `http://127.0.0.1:11434` |
-| `model`   | string  | yes      | Ollama model name used for classification        | `gpt-oss:20b`            |
-| `maxsize` | integer | no       | Maximum email size sent to the model (bytes)     | `100000`                 |
-| `prompt`  | string  | no       | The prompt which is sent to the model (optional) | _see below_              |
+| Field     | Type    | Required | Description                                                                 | Example                  |
+|-----------|---------|----------|-----------------------------------------------------------------------------|--------------------------|
+| `url`     | string  | yes      | Ollama server URL                                                           | `http://127.0.0.1:11434` |
+| `model`   | string  | yes      | Ollama model name used for classification                                   | `gpt-oss:20b`            |
+| `maxsize` | integer | no       | Maximum message size sent to the model (bytes), only affects `{{.Content}}` | `100000`                 |
+| `prompt`  | string  | no       | The prompt which is sent to the model (optional)                            | _see below_              |
 
 Example:
 

@@ -17,4 +17,5 @@ type Message struct {
 	Contents    []string
 	Date        time.Time
 	Raw         []byte
+	RawHeader   []byte
 }
