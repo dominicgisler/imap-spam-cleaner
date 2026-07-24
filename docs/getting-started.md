@@ -55,6 +55,11 @@ providers:                        # providers to be used for inboxes
       apikey: some-api-key        # gemini apikey
       model: gemini-2.5-flash     # gemini model to use
       maxsize: 100000             # optional message size limit for prompt (bytes)
+  prov5:                          # provider name
+    type: rspamd                  # provider type
+    config:                       # provider specific configuration
+      url: http://127.0.0.1:11333 # API url
+      timeout: 10s                # API timeout
 
 whitelists:                       # trusted senders as regexp, not to be analyzed
   whitelist1:                     # example with exact addresses
