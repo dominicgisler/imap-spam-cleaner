@@ -9,5 +9,10 @@ services:
     volumes:
       - spamassassin_data:/var/lib/spamassassin
 
+  rspamd:
+    image: rspamd/rspamd:latest
+    ports:
+      - "11333:11333"
+
 volumes:
   spamassassin_data: {}
