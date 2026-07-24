@@ -9,5 +9,6 @@ SELECT
     SUM(`moved_count`) AS `moved_count`
 FROM `run`
 WHERE (? = '' OR `inbox` = ?)
+AND (? IS NULL OR `started_at` >= ?)
 GROUP BY `inbox`
 ORDER BY `inbox`;
