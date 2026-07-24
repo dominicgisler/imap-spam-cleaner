@@ -4,6 +4,7 @@
 - [Ollama](ollama.md)
 - [Gemini](gemini.md)
 - [SpamAssassin](spamassassin.md)
+- [Rspamd](rspamd.md)
 
 ## AI
 
@@ -13,14 +14,8 @@ The following prompt is used by the AI providers if no custom prompt is specifie
 Analyze the following email for its spam potential.
 Return a spam score between 0 and 100. Only answer with the number itself.
 
-From: {{.From}}
-To: {{.To}}
-Delivered-To: {{.DeliveredTo}}
-Cc: {{.Cc}}
-Bcc: {{.Bcc}}
-Subject: {{.Subject}}
+{{.RawHeader}}
 
-Content:
 {{.Content}}
 ```
 
@@ -32,4 +27,6 @@ The following placeholders can be used in the prompt:
 - `{{.Cc}}`: message header `Cc`
 - `{{.Bcc}}`: message header `Bcc`
 - `{{.Subject}}`: message subject
-- `{{.Content}}`: message content
+- `{{.Content}}`: message content (cut after `maxsize`)
+- `{{.Raw}}`: full raw message (ignored from `maxsize`)
+- `{{.RawHeader}}`: all message headers (ignored from `maxsize`)

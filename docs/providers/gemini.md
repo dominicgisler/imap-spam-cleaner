@@ -4,12 +4,12 @@ Uses Gemini to analyze the message.
 
 Configuration options:
 
-| Field     | Type    | Required | Description                                      | Example            |
-|-----------|---------|----------|--------------------------------------------------|--------------------|
-| `apikey`  | string  | yes      | OpenAI API key                                   | `some-api-key`     |
-| `model`   | string  | yes      | OpenAI model used for classification             | `gemini-2.5-flash` |
-| `maxsize` | integer | no       | Maximum email size sent to the model (bytes)     | `100000`           |
-| `prompt`  | string  | no       | The prompt which is sent to the model (optional) | _see below_        |
+| Field     | Type    | Required | Description                                                                 | Example            |
+|-----------|---------|----------|-----------------------------------------------------------------------------|--------------------|
+| `apikey`  | string  | yes      | OpenAI API key                                                              | `some-api-key`     |
+| `model`   | string  | yes      | OpenAI model used for classification                                        | `gemini-2.5-flash` |
+| `maxsize` | integer | no       | Maximum message size sent to the model (bytes), only affects `{{.Content}}` | `100000`           |
+| `prompt`  | string  | no       | The prompt which is sent to the model (optional)                            | _see below_        |
 
 Example:
 
