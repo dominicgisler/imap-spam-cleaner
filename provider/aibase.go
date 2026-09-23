@@ -95,5 +95,6 @@ func (p *AIBase) buildPrompt(msg imap.Message) (string, error) {
 		return "", errors.New("prompt template error: " + err.Error())
 	}
 
+	logx.Debugf("Built prompt for message #%d (%s), length: %d bytes", msg.UID, msg.Subject, buf.Len())
 	return buf.String(), nil
 }

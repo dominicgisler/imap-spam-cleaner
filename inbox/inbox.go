@@ -117,6 +117,7 @@ func processInbox(ctx app.Context, inbox app.Inbox, prov app.Provider) {
 			}
 		}
 
+		logx.Infof("Analyzing message #%d (%s)...", m.UID, m.Subject)
 		if n, err = p.Analyze(m); err != nil {
 			logx.Errorf("Could not analyze message (%s): %v\n", m.Subject, err)
 			run.FailedCount++
