@@ -11,6 +11,7 @@
 | `provider`  | string   | yes      | Provider used for spam detection                        | `prov1`           |
 | `inbox`     | string   | yes      | Folder to scan                                          | `INBOX`           |
 | `spam`      | string   | yes      | Folder where spam messages are moved                    | `INBOX.Spam`      |
+| `markread`  | boolean  | no       | Mark detected messages as read                          | `true`            |
 | `minscore`  | integer  | yes      | Minimum spam score required to classify as spam (0–100) | `75`              |
 | `minage`    | duration | no       | Minimum age of message before scanning                  | `0h`              |
 | `maxage`    | duration | no       | Maximum age of message considered                       | `24h`             |
@@ -27,6 +28,7 @@ inboxes:
     provider: prov1
     inbox: INBOX
     spam: INBOX.Spam
+    markread: true
     minscore: 75
     minage: 0h
     maxage: 24h

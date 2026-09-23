@@ -118,7 +118,7 @@ func processInbox(ctx app.Context, inbox app.Inbox, prov app.Provider) {
 		}
 
 		if n, err = p.Analyze(m); err != nil {
-			logx.Errorf("Could not analyze message (%s): %v\n", m.Subject, err)
+			logx.Errorf("Could not analyze message #%d (%s): %v\n", m.UID, m.Subject, err)
 			run.FailedCount++
 			continue
 		}
@@ -126,8 +126,14 @@ func processInbox(ctx app.Context, inbox app.Inbox, prov app.Provider) {
 
 		if n >= inbox.MinScore {
 			if ctx.Options.AnalyzeOnly {
-				logx.Debugf("Analyze only mode, not moving message #%d", m.UID)
+				logx.Debugf("Analyze only mode, not moving message #%d (%s)", m.UID, m.Subject)
 				continue
+			}
+
+			if inbox.MarkRead {
+				if err = im.MarkRead(m.UID); err != nil {
+					logx.Errorf("Could not mark message #%d (%s) read: %v\n", m.UID, m.Subject, err)
+				}
 			}
 
 			if err = im.MoveMessage(m.UID, inbox.Spam); err != nil {

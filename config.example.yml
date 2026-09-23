@@ -58,6 +58,7 @@ inboxes:                          # inboxes to be checked
     provider: prov1               # provider used for spam analysis
     inbox: INBOX                  # inbox folder
     spam: INBOX.Spam              # spam folder
+    markread: true                # mark message as read
     minscore: 75                  # min score to detect spam (0-100)
     minage: 0h                    # min age of message
     maxage: 24h                   # max age of message

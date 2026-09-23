@@ -182,6 +182,19 @@ func (i *Imap) LoadMessages() ([]Message, error) {
 	return messages, nil
 }
 
+func (i *Imap) MarkRead(uid imap.UID) error {
+	uidSet := imap.UIDSet{}
+	uidSet.AddNum(uid)
+	if err := i.client.Store(uidSet, &imap.StoreFlags{
+		Op:     imap.StoreFlagsAdd,
+		Silent: true,
+		Flags:  []imap.Flag{imap.FlagSeen},
+	}, nil).Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (i *Imap) MoveMessage(uid imap.UID, mailbox string) error {
 	uidSet := imap.UIDSet{}
 	uidSet.AddNum(uid)
