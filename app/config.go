@@ -43,6 +43,7 @@ type Inbox struct {
 	MinAge    time.Duration `yaml:"minage"    validate:"omitempty"`
 	MaxAge    time.Duration `yaml:"maxage"    validate:"omitempty"`
 	Whitelist string        `yaml:"whitelist" validate:"omitempty"`
+	MarkRead  bool          `yaml:"markread"  validate:"omitempty"`
 }
 
 func LoadConfig() (*Config, error) {
