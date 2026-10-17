@@ -47,7 +47,8 @@ func New(cfg app.Inbox) (*Imap, error) {
 
 	mailboxes, err = i.client.List("", "*", nil).Collect()
 	if err != nil {
-		return nil, fmt.Errorf("failed to list mailboxes: %w", err)
+		logx.Warnf("failed to list mailboxes: %v", err)
+		return i, nil
 	}
 
 	logx.Debug("Available mailboxes:")
