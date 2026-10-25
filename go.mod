@@ -8,13 +8,13 @@ require (
 	github.com/go-co-op/gocron/v2 v2.22.0
 	github.com/go-playground/validator/v10 v10.30.5
 	github.com/jmoiron/sqlx v1.4.0
-	github.com/ollama/ollama v0.40.6
+	github.com/ollama/ollama v0.40.8
 	github.com/pressly/goose/v3 v3.29.0
 	github.com/sashabaranov/go-openai v1.43.0
 	github.com/sirupsen/logrus v1.10.2
 	google.golang.org/genai v1.75.0
 	gopkg.in/yaml.v3 v3.0.1
-	modernc.org/sqlite v1.60.1
+	modernc.org/sqlite v1.61.0
 )
 
 require (
