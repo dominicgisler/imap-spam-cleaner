@@ -58,7 +58,7 @@ This project follows a standard Go workflow.
 ## Requirements
 
 * Git
-* Go 1.26+
+* Go 1.27+
 
 ## Clone the Repository
 
