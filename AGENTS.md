@@ -21,7 +21,7 @@ docker compose -f docker-compose.dev.yml up   # local spamd (:783) and rspamd (:
 
 There are no automated tests yet. Any new ones should use the standard `testing` package (`go test ./...`; single test: `go test ./provider -run TestName`).
 
-CI: golangci-lint v2.15.0 with `only-new-issues` (linters: errorlint, gocritic, gocyclo, gosec, usestdlibvars; gofmt/goimports). golangci-lint refuses to run if it was built with an older Go than the `go` directive in `go.mod`, so bump the pin in `.github/workflows/golangci-lint.yml` (and the local install) together with the Go version. Docs CI runs `mkdocs build --strict`, so a broken link or nav entry fails the deploy.
+CI: golangci-lint v2.15.0 with `only-new-issues` (linters: errorlint, gocritic, gocyclo, gosec, usestdlibvars; gofmt/goimports). golangci-lint refuses to run if it was built with an older Go than the `go` directive in `go.mod`, so bump the pin in `.github/workflows/golangci-lint.yml` (and the local install) together with the Go version. Docs CI runs `mkdocs build --strict`, so a broken link or nav entry fails the deploy. `docs/contributing.md` only includes the root `CONTRIBUTING.md` (pymdownx.snippets), so edit the root file.
 
 ## Architecture
 

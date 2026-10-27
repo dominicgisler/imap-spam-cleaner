@@ -6,8 +6,8 @@ Configuration options:
 
 | Field     | Type     | Required | Description                                                                 | Example            |
 |-----------|----------|----------|-----------------------------------------------------------------------------|--------------------|
-| `apikey`  | string   | yes      | OpenAI API key                                                              | `some-api-key`     |
-| `model`   | string   | yes      | OpenAI model used for classification                                        | `gemini-2.5-flash` |
+| `apikey`  | string   | yes      | Gemini API key                                                              | `some-api-key`     |
+| `model`   | string   | yes      | Gemini model used for classification                                        | `gemini-2.5-flash` |
 | `maxsize` | integer  | no       | Maximum message size sent to the model (bytes), only affects `{{.Content}}` | `100000`           |
 | `timeout` | duration | no       | Timeout for the request, default `2m`                                       | `5m`               |
 | `prompt`  | string   | no       | The prompt which is sent to the model (optional)                            | _see below_        |

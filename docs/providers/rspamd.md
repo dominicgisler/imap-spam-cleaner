@@ -8,10 +8,10 @@ If you want to rely on the `required_score` of `rspamd`, set the `minscore` opti
 
 Configuration options:
 
-| Field     | Type     | Required | Description                                  | Example                  |
-|-----------|----------|----------|----------------------------------------------|--------------------------|
-| `url`     | string   | yes      | Rspamd API URL                               | `http://127.0.0.1:11333` |
-| `timeout` | duration | no       | Timeout for the request                      | `10s`                    |
+| Field     | Type     | Required | Description                           | Example                  |
+|-----------|----------|----------|---------------------------------------|--------------------------|
+| `url`     | string   | yes      | Rspamd API URL                        | `http://127.0.0.1:11333` |
+| `timeout` | duration | no       | Timeout for the request, default `5s` | `10s`                    |
 
 Example:
 

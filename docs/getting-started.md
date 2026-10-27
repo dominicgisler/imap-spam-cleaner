@@ -1,16 +1,19 @@
 # Getting started
 
 - Create `config.yml` matching your inboxes (example below)
-- Prepare empty file `store.db` to store metrics (optional)
+- Optional: create an empty `store.db` (`touch store.db`) to keep the [run statistics](http-api.md) across container updates.
+  It must exist before the container starts, otherwise Docker creates a directory with that name and no statistics are stored.
 - Create `docker-compose.yml` if using docker compose (example below)
 - Start the container with: `docker compose up -d`
 - Or with: `docker run -d --name imap-spam-cleaner -v ./config.yml:/app/config.yml -v ./store.db:/app/store.db dominicgisler/imap-spam-cleaner`
 
 The container will run in the background and execute analysis steps according to the defined schedule. If needed check logs either with `docker compose logs -f` or `docker logs -f imap-spam-cleaner`.
 
+Every run analyzes all messages within `minage` and `maxage` again, so read [how runs work](configuration/inboxes.md#runs) before choosing the schedule, especially with paid AI providers.
+
 ## Configuration
 
-Use this configuration as an example, it contains different providers with different configuration options. Consult specific wiki pages for detailed information about the options.
+Use this configuration as an example, it contains different providers with different configuration options. See [Configuration](configuration/index.md) and [Providers](providers/index.md) for all options.
 
 ```yaml
 logging:
@@ -21,7 +24,7 @@ providers:                        # providers to be used for inboxes
     type: openai                  # provider type
     config:                       # provider specific configuration
       apikey: some-api-key        # openai apikey
-      model: gpt-4o-mini          # openai model to use
+      model: gpt-5-mini           # openai model to use
       maxsize: 100000             # optional message size limit for prompt (bytes)
       prompt: |                   # prompt to be sent to the model
         Analyze the following email for its spam potential.
@@ -64,28 +67,27 @@ providers:                        # providers to be used for inboxes
 
 whitelists:                       # trusted senders as regexp, not to be analyzed
   whitelist1:                     # example with exact addresses
-    - ^.* <info@example.com>$     # matches <info@example.com>
-    - ^.* <contact@domain.com>$   # matches <contact@domain.com>
+    - ^.* <info@example\.com>$    # matches <info@example.com>
+    - ^.* <contact@domain\.com>$  # matches <contact@domain.com>
   whitelist2:                     # example with only domain match
-    - ^.* <.*@example.com>$       # matches for all @example.com addresses
-    - ^.* <.*@domain.com>$        # matches for all @domain.com addresses
+    - ^.* <.*@example\.com>$      # matches for all @example.com addresses
+    - ^.* <.*@domain\.com>$       # matches for all @domain.com addresses
 
 inboxes:                          # inboxes to be checked
-  - schedule: "* * * * *"         # schedule in cron format (when to execute spam analysis)
+  - schedule: "*/5 * * * *"       # schedule in cron format (when to execute spam analysis)
     host: mail.domain.tld         # imap host
-    port: 143                     # imap port
-    tls: false                    # imap tls
+    port: 993                     # imap port
+    tls: true                     # imap tls (false = unencrypted, no STARTTLS)
     username: user@domain.tld     # imap user
     password: mypass              # imap password
     provider: prov1               # provider used for spam analysis
     inbox: INBOX                  # inbox folder
     spam: INBOX.Spam              # spam folder
-    markread: false               # mark message as read
+    markread: true                # mark message as read
     minscore: 75                  # min score to detect spam (0-100)
     minage: 0h                    # min age of message
-    maxage: 24h                   # max age of message
+    maxage: 15m                   # max age of message (messages in range are analyzed on every run)
     whitelist: whitelist1         # whitelist to use, empty/missing = no whitelist
-
 ```
 
 ## Docker compose
@@ -104,4 +106,18 @@ services:
     volumes:
       - ./config.yml:/app/config.yml:ro # required
       - ./store.db:/app/store.db:rw     # optional
+```
+
+## Command line flags
+
+| Flag            | Description                                                                                  |
+|-----------------|----------------------------------------------------------------------------------------------|
+| `-now`          | Process every inbox once, ignoring the schedules, then exit. The HTTP server is not started. |
+| `-analyze-only` | Only analyze messages. Nothing is marked as read, moved or stored as a run.                  |
+| `-version`      | Print the version and exit.                                                                  |
+
+With Docker, add the flags after the image name. To try a configuration without touching any mail, run it once with `logging.level: debug`, which logs the score of every message:
+
+```console
+docker run --rm -v ./config.yml:/app/config.yml dominicgisler/imap-spam-cleaner -now -analyze-only
 ```

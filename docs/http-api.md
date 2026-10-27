@@ -1,8 +1,12 @@
 # HTTP API
 
-IMAP Spam Cleaner exposes HTTP endpoints for runtime information when the HTTP server is started.
+IMAP Spam Cleaner exposes HTTP endpoints for runtime information on port `8080`.
+The HTTP server always runs, except with the `-now` flag.
 
-The data is stored in `store.db`, make sure to map the file accordingly on your system.
+The data is stored in `store.db`, make sure to [map the file](getting-started.md) accordingly on your system.
+
+The API has no authentication and shows the IMAP usernames of your inboxes.
+Don't publish the port to untrusted networks, e.g. use `127.0.0.1:8080:8080` in `docker-compose.yml` to only allow local access.
 
 ## Run summary
 
@@ -11,6 +15,8 @@ GET /runs/summary
 ```
 
 Returns one summary entry per inbox. Each entry contains the first recorded run, the last recorded run, the number of runs, and the summed run counters.
+
+A run is stored when it completes. Runs that fail before analyzing messages (e.g. an IMAP login error) and runs with `-analyze-only` are not stored.
 
 ### Query parameters
 
@@ -105,15 +111,15 @@ If an inbox is provided, only one summary element will be returned.
 
 ### Fields
 
-| Field           | Description                                      |
-|-----------------|--------------------------------------------------|
-| `inbox`         | Inbox identifier used by the run.                |
-| `run_count`     | Number of stored runs for the inbox.             |
-| `first_run_at`  | Start time of the first stored run.              |
-| `last_run_at`   | Start time of the most recent stored run.        |
-| `message_count` | Total number of messages loaded across runs.     |
-| `skipped_count` | Total number of skipped messages across runs.    |
-| `failed_count`  | Total number of failed message analyses.         |
-| `moved_count`   | Total number of messages moved to the spam folder. |
+| Field           | Description                                                              |
+|-----------------|--------------------------------------------------------------------------|
+| `inbox`         | IMAP username of the inbox. Inboxes with the same username are combined. |
+| `run_count`     | Number of stored runs for the inbox.                                     |
+| `first_run_at`  | Start time of the first stored run.                                      |
+| `last_run_at`   | Start time of the most recent stored run.                                |
+| `message_count` | Total number of messages loaded across runs.                             |
+| `skipped_count` | Total number of skipped messages across runs.                            |
+| `failed_count`  | Total number of failed message analyses.                                 |
+| `moved_count`   | Total number of messages moved to the spam folder.                       |
 
 Only the `GET` method is supported. Other methods return `405 Method Not Allowed`.

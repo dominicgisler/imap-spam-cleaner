@@ -17,6 +17,6 @@ providers:
     type: openai
     config:
       apikey: some-api-key
-      model: gpt-4o-mini
+      model: gpt-5-mini
       maxsize: 100000
 ```

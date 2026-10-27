@@ -1,4 +1,4 @@
-# IMAP spam cleaner
+# IMAP Spam Cleaner
 
 ![logo](docs/assets/icon_128.png)
 
@@ -10,21 +10,23 @@
 [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-grey?style=for-the-badge&logo=docker)](https://hub.docker.com/r/dominicgisler/imap-spam-cleaner)
 [![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-grey?style=for-the-badge&logo=ko-fi)](https://ko-fi.com/dominicgisler/tip)
 
-A tool to clean up spam in your imap inbox.
+A tool to clean up spam in your IMAP inbox.
 
 Check the [Documentation](https://dominicgisler.github.io/imap-spam-cleaner) for detailed information.
 
 ## Summary
 
-This application loads mails from configured imap inboxes and checks their contents using the defined provider.
+This application loads mails from configured IMAP inboxes and checks their contents using the defined provider
+(OpenAI, Ollama, Gemini, TypeSafe, SpamAssassin or rspamd).
 Depending on a spam score, the message can be moved to the spam folder, keeping your inbox clean.
 
 ## Example
 
 ```console
 $ docker run -v ./config.yml:/app/config.yml dominicgisler/imap-spam-cleaner:latest
-INFO   [2026-02-28T16:53:41Z] Starting imap-spam-cleaner v0.5.3
+INFO   [2026-02-28T16:53:41Z] Starting imap-spam-cleaner v0.9.4
 DEBUG  [2026-02-28T16:53:41Z] Loaded config
+INFO   [2026-02-28T16:53:41Z] Starting HTTP server on :8080
 INFO   [2026-02-28T16:53:41Z] Scheduling inbox info@example.com (*/5 * * * *)
 INFO   [2026-02-28T16:55:00Z] Handling info@example.com
 DEBUG  [2026-02-28T16:55:00Z] Available mailboxes:
@@ -42,7 +44,7 @@ DEBUG  [2026-02-28T16:55:12Z] Spam score of message #479 (Leider ist bei der Ver
 DEBUG  [2026-02-28T16:55:18Z] Spam score of message #480 (Das neue Geheimnis gegen Bauchfett!): 92/100
 DEBUG  [2026-02-28T16:55:26Z] Spam score of message #481 (Schnell: 1 Million / Lady Million): 80/100
 DEBUG  [2026-02-28T16:55:32Z] Spam score of message #483 (Vermögen x4 zu Fest): 85/100
-INFO   [2026-02-28T16:55:32Z] Moved 4 messages
+INFO   [2026-02-28T16:55:32Z] Moved 5 messages
 ```
 
 ## Contributors
