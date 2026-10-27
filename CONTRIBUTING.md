@@ -6,12 +6,12 @@ Contributions of all kinds are welcome - from fixing bugs and adding features to
 
 ---
 
-# Table of Contents
+## Table of Contents
 
 * [Ways to Contribute](#ways-to-contribute)
 * [Before You Start](#before-you-start)
 * [Development Setup](#development-setup)
-* [Code Style & Linting](#code-style--linting)
+* [Code Style and Linting](#code-style-and-linting)
 * [Pull Request Guidelines](#pull-request-guidelines)
 * [Commit Message Guidelines](#commit-message-guidelines)
 * [Documentation](#documentation)
@@ -22,7 +22,7 @@ Contributions of all kinds are welcome - from fixing bugs and adding features to
 
 ---
 
-# Ways to Contribute
+## Ways to Contribute
 
 You can contribute in several ways:
 
@@ -39,7 +39,7 @@ If you're unsure where to start, look for issues labeled:
 
 ---
 
-# Before You Start
+## Before You Start
 
 Before beginning work on a new feature or significant change:
 
@@ -51,47 +51,59 @@ This helps keep development organized and review cycles efficient.
 
 ---
 
-# Development Setup
+## Development Setup
 
 This project follows a standard Go workflow.
 
-## Requirements
+### Requirements
 
 * Git
 * Go 1.27+
 
-## Clone the Repository
+### Clone the Repository
 
 ```bash
 git clone https://github.com/dominicgisler/imap-spam-cleaner.git
 cd imap-spam-cleaner
 ```
 
-## Install Dependencies
+### Install Dependencies
 
 ```bash
-go get ./...
+go mod download
 ```
 
-## Run the Application
+### Run the Application
+
+The application reads `config.yml` from the working directory and creates `store.db` next to it.
 
 ```bash
-go run .
+cp config.example.yml config.yml   # then edit it to match your inbox
+go run . -now -analyze-only        # analyze once, without moving any mail
+go run .                           # run on the configured schedules
+```
+
+To test the SpamAssassin and rspamd providers locally, start both services (spamd on port `783`, rspamd on port `11333`):
+
+```bash
+docker compose -f docker-compose.dev.yml up
 ```
 
 ---
 
-# Code Style & Linting
+## Code Style and Linting
 
 This project uses [golangci-lint](https://golangci-lint.run/).
 
-## Run Linter
+### Run Linter
 
 ```bash
 make lint
 ```
 
-## Style Expectations
+CI uses golangci-lint v2.15.0. `make lint` applies fixes directly to your files, so review the changes afterwards.
+
+### Style Expectations
 
 * Follow idiomatic Go conventions
 * Keep code consistent with the existing codebase
@@ -102,24 +114,24 @@ Lint checks must pass before submitting a Pull Request.
 
 ---
 
-# Pull Request Guidelines
+## Pull Request Guidelines
 
 All changes must be submitted via Pull Requests.
 
-## General Rules
+### General Rules
 
 * Open an issue before implementing large changes
 * Keep PRs small and focused
 * One feature or fix per PR
 * Multiple features should be split into multiple PRs
 
-## Review Process
+### Review Process
 
 * PRs are reviewed by the maintainer
 * Linting must pass
 * Smaller PRs are reviewed faster
 
-## AI Usage Policy
+### AI Usage Policy
 
 AI tools may be used, but:
 
@@ -128,7 +140,7 @@ AI tools may be used, but:
 
 ---
 
-# Commit Message Guidelines
+## Commit Message Guidelines
 
 Write short and descriptive commit messages - prefixes may be used, but are not required.
 
@@ -140,14 +152,14 @@ feat: add support for multiple folders
 docs: update configuration example
 ```
 
-## Additional Notes
+### Additional Notes
 
 * Small PRs may be rebased
 * Large PRs (with many commits) may be squash-merged
 
 ---
 
-# Documentation
+## Documentation
 
 Documentation is maintained using [MkDocs](https://www.mkdocs.org/).
 
@@ -157,13 +169,14 @@ Location:
 docs/
 ```
 
-## Building and Serving Docs Locally
+### Building and Serving Docs Locally
 
 ```
 make docs
 ```
 
-This will start a local documentation server so you can preview changes before submitting them.
+This will start a local documentation server on http://localhost:8000 so you can preview changes before submitting them.
+The deployment builds with `mkdocs build --strict`, so a broken link or nav entry fails it.
 
 When adding features or changing behavior:
 
@@ -173,13 +186,13 @@ When adding features or changing behavior:
 
 Documentation improvements are always welcome.
 
-## Documentation Deployment
+### Documentation Deployment
 
 The documentation is automatically built and deployed to [GitHub Pages](https://dominicgisler.github.io/imap-spam-cleaner) when changes are merged into the master branch.
 
 ---
 
-# Testing
+## Testing
 
 There are currently no automated tests in this project.
 
@@ -193,7 +206,7 @@ If adding tests:
 
 ---
 
-# Release Workflow
+## Release Workflow
 
 Releases are created manually using GitHub Releases.
 
@@ -205,7 +218,7 @@ Contributors do not need to manage releases.
 
 ---
 
-# Code of Conduct
+## Code of Conduct
 
 This project aims to be welcoming and respectful to all contributors.
 
@@ -220,7 +233,7 @@ If a formal Code of Conduct is added in the future, this section will be updated
 
 ---
 
-# Final Notes
+## Final Notes
 
 Thank you for contributing to imap-spam-cleaner!
 
