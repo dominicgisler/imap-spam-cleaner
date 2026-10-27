@@ -121,9 +121,8 @@ All changes must be submitted via Pull Requests.
 
 ## AI Usage Policy
 
-AI tools may be used as assistance, but:
+AI tools may be used, but:
 
-* Fully AI-generated code submissions should be avoided
 * You should understand and review all submitted code
 * Code quality and correctness remain your responsibility
 
