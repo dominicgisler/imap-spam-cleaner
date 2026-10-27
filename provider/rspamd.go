@@ -4,12 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
@@ -37,16 +35,8 @@ func (p *Rspamd) ValidateConfig(config map[string]string) error {
 	}
 	p.url = uri.String()
 
-	if config["timeout"] == "" {
-		p.timeout = 5 * time.Second
-	} else if to, err := time.ParseDuration(config["timeout"]); err == nil && to > 0 {
-		p.timeout = to
-	} else {
-		t, err := strconv.ParseFloat(config["timeout"], 64)
-		if err != nil || t <= 0 {
-			return errors.New("rspamd timeout must be a duration (eg. 10s, 1m) or a positive number of seconds")
-		}
-		p.timeout = time.Duration(t * float64(time.Second))
+	if p.timeout, err = parseTimeout(config["timeout"], 5*time.Second); err != nil {
+		return fmt.Errorf("rspamd %w", err)
 	}
 
 	return nil

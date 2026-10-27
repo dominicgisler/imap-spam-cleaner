@@ -59,8 +59,11 @@ func (p *Gemini) Analyze(msg imap.Message) (int, error) {
 		return 0, err
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), p.timeout)
+	defer cancel()
+
 	resp, err := p.client.Models.GenerateContent(
-		context.Background(),
+		ctx,
 		p.model,
 		[]*genai.Content{
 			{

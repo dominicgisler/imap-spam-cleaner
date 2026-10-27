@@ -67,8 +67,11 @@ func (p *Ollama) Analyze(msg imap.Message) (int, error) {
 		Stream: &b,
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), p.timeout)
+	defer cancel()
+
 	var resp string
-	if err = p.client.Chat(context.Background(), &req, func(response api.ChatResponse) error {
+	if err = p.client.Chat(ctx, &req, func(response api.ChatResponse) error {
 		resp = response.Message.Content
 		return nil
 	}); err != nil {
