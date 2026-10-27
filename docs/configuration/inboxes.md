@@ -17,6 +17,8 @@
 | `maxage`    | duration | no       | Maximum age of message considered                       | `24h`             |
 | `whitelist` | string   | no       | Whitelist to use                                        | `whitelist1`      |
 
+Runs of the same inbox never overlap. If a run is still in progress when the next one is due, that run is skipped.
+
 ```yaml
 inboxes:
   - schedule: "* * * * *"
