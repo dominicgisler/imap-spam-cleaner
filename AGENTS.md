@@ -25,7 +25,7 @@ CI: golangci-lint v2.15.0 with `only-new-issues` (linters: errorlint, gocritic, 
 
 ## Architecture
 
-`main.go` loads config → `database.Init("store.db")` → validates every provider config up front (fail fast) → either `inbox.RunAllInboxes` (`-now`) or starts the HTTP API on `:8080` in a goroutine and blocks in `inbox.Schedule` (gocron, one cron job per inbox, stops on SIGINT/SIGTERM). The paths `config.yml` and `store.db` and the port are hardcoded and resolved against the working directory (`/app` in Docker).
+`main.go` loads config → `database.Init("store.db")` → validates every provider config up front (fail fast) → either `inbox.RunAllInboxes` (`-now`) or starts the HTTP API on `:8080` in a goroutine and blocks in `inbox.Schedule` (gocron, one cron job per inbox in singleton mode with `LimitModeReschedule`, so a run still in progress makes the next one skip; stops on SIGINT/SIGTERM). The paths `config.yml` and `store.db` and the port are hardcoded and resolved against the working directory (`/app` in Docker).
 
 `inbox.processInbox` is the core loop: open an IMAP connection, load messages, skip senders on the whitelist, `provider.Analyze` each message one at a time, optionally mark `\Seen`, move it to the spam folder, then write a `database.Run` row. Analysis failures are counted and skipped, never fatal. There is **no per-message state**: every run re-scores every message still in the folder within the `minage`/`maxage` window, so the schedule and `maxage` directly drive LLM API cost.
 

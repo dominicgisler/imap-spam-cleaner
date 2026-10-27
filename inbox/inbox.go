@@ -32,6 +32,7 @@ func Schedule(ctx app.Context) {
 		if _, err = s.NewJob(
 			gocron.CronJob(inbox.Schedule, false),
 			gocron.NewTask(processInbox, ctx, inbox, prov),
+			gocron.WithSingletonMode(gocron.LimitModeReschedule),
 		); err != nil {
 			logx.Errorf("Could not schedule inbox %s (%s): %v", inbox.Username, inbox.Schedule, err)
 		}
