@@ -3,6 +3,7 @@
 - [OpenAI](openai.md)
 - [Ollama](ollama.md)
 - [Gemini](gemini.md)
+- [TypeSafe (Jev)](typesafe.md)
 - [SpamAssassin](spamassassin.md)
 - [Rspamd](rspamd.md)
 

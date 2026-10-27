@@ -39,6 +39,12 @@ providers:                        # providers to be used for inboxes
     config:                       # provider specific configuration
       url: http://127.0.0.1:11333 # API url
       timeout: 10s                # API timeout
+  prov6:                          # provider name
+    type: typesafe                # provider type
+    config:                       # provider specific configuration
+      apikey: some-api-key        # typesafe apikey
+      model: jev-1.14.0           # jev model to use
+      maxsize: 50000              # optional message size limit for prompt (bytes)
 
 whitelists:                       # trusted senders as regexp, not to be analyzed
   whitelist1:                     # example with exact addresses
