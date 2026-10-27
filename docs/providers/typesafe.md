@@ -10,14 +10,15 @@ Only input tokens are billed.
 
 Configuration options:
 
-| Field          | Type    | Required | Description                                                                 | Example                                   |
-|----------------|---------|----------|-----------------------------------------------------------------------------|-------------------------------------------|
-| `apikey`       | string  | yes      | TypeSafe API key                                                            | `some-api-key`                            |
-| `model`        | string  | yes      | Jev model used for classification                                           | `jev-1.14.0`                              |
-| `maxsize`      | integer | no       | Maximum message size sent to the model (bytes), only affects `{{.Content}}` | `50000`                                   |
-| `instructions` | string  | no       | The yes/no question asked about the message                                 | `Is this email spam, phishing or a scam?` |
-| `prompt`       | string  | no       | The message sent to the model (optional), the question is sent separately   | _see below_                               |
-| `url`          | string  | no       | API URL, e.g. for a proxy                                                   | `https://api.typesafe.ai`                 |
+| Field          | Type     | Required | Description                                                                 | Example                                   |
+|----------------|----------|----------|-----------------------------------------------------------------------------|-------------------------------------------|
+| `apikey`       | string   | yes      | TypeSafe API key                                                            | `some-api-key`                            |
+| `model`        | string   | yes      | Jev model used for classification                                           | `jev-1.14.0`                              |
+| `maxsize`      | integer  | no       | Maximum message size sent to the model (bytes), only affects `{{.Content}}` | `50000`                                   |
+| `timeout`      | duration | no       | Timeout for the request, default `2m`                                       | `5m`                                      |
+| `instructions` | string   | no       | The yes/no question asked about the message                                 | `Is this email spam, phishing or a scam?` |
+| `prompt`       | string   | no       | The message sent to the model (optional), the question is sent separately   | _see below_                               |
+| `url`          | string   | no       | API URL, e.g. for a proxy                                                   | `https://api.typesafe.ai`                 |
 
 `jev-latest` always points to the newest release. Pin a version such as `jev-1.14.0` to keep scores stable.
 The available models are listed in the [TypeSafe docs](https://docs.typesafe.ai/models).

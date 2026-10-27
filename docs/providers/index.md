@@ -9,6 +9,9 @@
 
 ## AI
 
+Each request to an AI provider is cancelled after `timeout` (default `2m`).
+The message then counts as failed and is analyzed again on the next run.
+
 The following prompt is used by the AI providers if no custom prompt is specified.
 
 ```

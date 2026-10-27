@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/dominicgisler/imap-spam-cleaner/imap"
 	"github.com/dominicgisler/imap-spam-cleaner/logx"
@@ -14,6 +15,7 @@ import (
 type AIBase struct {
 	model   string
 	maxsize int
+	timeout time.Duration
 	prompt  *template.Template
 }
 
@@ -32,6 +34,10 @@ func (p *AIBase) ValidateConfig(config map[string]string) error {
 			return errors.New("maxsize must be a positive integer")
 		}
 		p.maxsize = int(n)
+	}
+
+	if p.timeout, err = parseTimeout(config["timeout"], 2*time.Minute); err != nil {
+		return err
 	}
 
 	prompt := `

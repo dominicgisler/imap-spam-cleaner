@@ -110,8 +110,11 @@ func (p *TypeSafe) Analyze(msg imap.Message) (int, error) {
 		return 0, err
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), p.timeout)
+	defer cancel()
+
 	req, err := http.NewRequestWithContext(
-		context.Background(),
+		ctx,
 		http.MethodPost,
 		p.url.JoinPath("v1", "systemone").String(),
 		bytes.NewReader(body),

@@ -48,8 +48,11 @@ func (p *OpenAI) Analyze(msg imap.Message) (int, error) {
 		return 0, err
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), p.timeout)
+	defer cancel()
+
 	resp, err := p.client.CreateChatCompletion(
-		context.Background(),
+		ctx,
 		openai.ChatCompletionRequest{
 			Model: p.model,
 			Messages: []openai.ChatCompletionMessage{

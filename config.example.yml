@@ -21,6 +21,7 @@ providers:                        # providers to be used for inboxes
       url: http://127.0.0.1:11434 # ollama url
       model: gpt-oss:20b          # ollama model to use
       maxsize: 100000             # optional message size limit for prompt (bytes)
+      timeout: 5m                 # optional request timeout (default 2m)
   prov3:                          # provider name
     type: spamassassin            # provider type
     config:                       # provider specific configuration
