@@ -1,9 +1,9 @@
 # Providers
 
-| Field    | Type   | Required | Description                     | Options                            |
-|----------|--------|----------|---------------------------------|------------------------------------|
-| `type`   | string | yes      | Provider implementation         | `openai`, `ollama`, `spamassassin` |
-| `config` | object | yes      | Provider-specific configuration |                                    |
+| Field    | Type   | Required | Description                     | Options                                                            |
+|----------|--------|----------|---------------------------------|--------------------------------------------------------------------|
+| `type`   | string | yes      | Provider implementation         | `openai`, `ollama`, `gemini`, `typesafe`, `spamassassin`, `rspamd` |
+| `config` | object | yes      | Provider-specific configuration |                                                                    |
 
 A list of providers, which can be reused by inboxes.
 Each provider is identified by a name (`prov1` in the following example) and will be referenced by that name.

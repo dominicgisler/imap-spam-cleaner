@@ -45,6 +45,7 @@ nav:
       - OpenAI: providers/openai.md
       - Ollama: providers/ollama.md
       - Gemini: providers/gemini.md
+      - TypeSafe (Jev): providers/typesafe.md
       - SpamAssassin: providers/spamassassin.md
       - Rspamd: providers/rspamd.md
   - HTTP API: http-api.md
