@@ -21,7 +21,7 @@ docker compose -f docker-compose.dev.yml up   # local spamd (:783) and rspamd (:
 
 There are no automated tests yet. Any new ones should use the standard `testing` package (`go test ./...`; single test: `go test ./provider -run TestName`).
 
-CI: golangci-lint v2.12.2 with `only-new-issues` (linters: errorlint, gocritic, gocyclo, gosec, usestdlibvars; gofmt/goimports). Docs CI runs `mkdocs build --strict`, so a broken link or nav entry fails the deploy.
+CI: golangci-lint v2.15.0 with `only-new-issues` (linters: errorlint, gocritic, gocyclo, gosec, usestdlibvars; gofmt/goimports). golangci-lint refuses to run if it was built with an older Go than the `go` directive in `go.mod`, so bump the pin in `.github/workflows/golangci-lint.yml` (and the local install) together with the Go version. Docs CI runs `mkdocs build --strict`, so a broken link or nav entry fails the deploy.
 
 ## Architecture
 
@@ -39,7 +39,7 @@ CI: golangci-lint v2.12.2 with `only-new-issues` (linters: errorlint, gocritic, 
 - **HTTP (`handler/`)**: only `GET /runs/summary?inbox=&maxage=<seconds>` (see `docs/http-api.md`).
 - **Logging (`logx/`)**: a logrus wrapper. Use it instead of `log`/`fmt`.
 
-The module targets Go 1.26, so newer syntax such as `new(expr)` (in `database/run.go`) is intentional and valid.
+The module targets Go 1.27, so newer syntax such as `new(expr)` (in `database/run.go`) is intentional and valid.
 
 ### Adding a provider
 
