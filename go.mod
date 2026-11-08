@@ -6,15 +6,15 @@ require (
 	github.com/emersion/go-imap/v2 v2.0.0-beta.8
 	github.com/emersion/go-message v0.18.2
 	github.com/go-co-op/gocron/v2 v2.23.0
-	github.com/go-playground/validator/v10 v10.30.5
+	github.com/go-playground/validator/v10 v10.30.6
 	github.com/jmoiron/sqlx v1.4.0
-	github.com/ollama/ollama v0.40.13
+	github.com/ollama/ollama v0.40.14
 	github.com/pressly/goose/v3 v3.29.0
 	github.com/sashabaranov/go-openai v1.43.0
 	github.com/sirupsen/logrus v1.10.2
-	google.golang.org/genai v1.76.0
+	google.golang.org/genai v1.77.0
 	gopkg.in/yaml.v3 v3.0.1
-	modernc.org/sqlite v1.61.0
+	modernc.org/sqlite v1.61.1
 )
 
 require (
